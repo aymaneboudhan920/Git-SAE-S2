@@ -1,0 +1,16 @@
+.encadre {
+    -fx-border-color: #ecf0f1;
+    -fx-border-width: 2px;
+    -fx-background-image: url("fond.png");
+}
+
+.vague{
+    -fx-font-weight: bold;
+}
+
+.image-fond-labo {
+    -fx-background-image: url("fond.png");
+    -fx-background-size: cover;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+}
