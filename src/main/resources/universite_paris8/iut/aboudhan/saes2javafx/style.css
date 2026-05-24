@@ -1,0 +1,48 @@
+.encadre {
+    -fx-background-image: url("vue/fond.png");
+}
+
+.btn-infecte {
+    -fx-background-color: #03cc04;
+    -fx-background-radius: 10px;
+}
+
+.btn-piece {
+    -fx-background-color: #c6b600;
+    -fx-background-radius: 10px;
+}
+
+.btn-shop {
+    -fx-background-color: #ffa600;
+    -fx-background-radius: 10px;
+
+}
+
+.btn-potion {
+    -fx-background-radius: 10;
+}
+
+.potion-soin {
+    -fx-background-color: #27ae60;
+}
+
+.potion-rage {
+    -fx-background-color: #c0392b;
+}
+
+.potion-gel {
+    -fx-background-color: #2980b9;
+}
+
+.btn-plus {
+    -fx-background-color: #7f8c8d;
+}
+
+.btn-start {
+    -fx-background-color: #27ae60;
+    -fx-background-radius: 10;
+}
+
+.btn-inventaire-tour {
+    -fx-background-radius: 10;
+}
