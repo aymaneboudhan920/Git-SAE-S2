@@ -15,6 +15,7 @@ import javafx.util.Duration;
 
 import universite_paris8.iut.aboudhan.saes2javafx.modele.Microbe;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.Environnement;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.DefaiteVue;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.TerrainVue;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.MicrobeVue;
 
@@ -26,7 +27,7 @@ public class HelloController implements Initializable {
     @FXML private Label labelInfectes;
 
     // Le contrôleur instancie son modèle global : l'environnement
-    private final Environnement env = new Environnement();
+    private Environnement env = new Environnement();
 
     private final List<Microbe> microbesActifs = new ArrayList<>();
     private final java.util.Map<Microbe, MicrobeVue> vuesMicrobes = new java.util.HashMap<>();
@@ -122,64 +123,86 @@ public class HelloController implements Initializable {
         gameLoop = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                int[][] grille = env.getGrille();
-                int tailleTuile = env.getTailleTuile();
+            int[][] grille = env.getGrille();
+            int tailleTuile = env.getTailleTuile();
 
-                // Compteurs dynamiques
-                labelArgent.setText(String.valueOf(env.getArgent()));
-                labelInfectes.setText(String.valueOf(env.getGensInfectes()));
-                // Parcourir tous les microbes actifs
-                for (int i = microbesActifs.size() - 1; i >= 0; i--){
-                    Microbe m = microbesActifs.get(i);
-                    // Convertir les pixels en indices de cases
-                    int caseJ = (int) (m.getX() / tailleTuile);
-                    int caseI = (int) (m.getY() / tailleTuile);
+            // Compteurs dynamiques
+            labelArgent.setText(String.valueOf(env.getArgent()));
+            labelInfectes.setText(String.valueOf(env.getGensInfectes()));
+            // Parcourir tous les microbes actifs
+            for (int i = microbesActifs.size() - 1; i >= 0; i--){
+                Microbe m = microbesActifs.get(i);
+                // Convertir les pixels en indices de cases
+                int caseJ = (int) (m.getX() / tailleTuile);
+                int caseI = (int) (m.getY() / tailleTuile);
 
-                    // Vérifier que les indices ne dépassent pas les dimensions de la grille de jeu
-                    if (caseI >= 0 && caseI < grille.length && caseJ >= 0 && caseJ < grille[0].length) {
-                        // Ralentir le microbe si le microbe se trouve sur une case n°6 (acide ralentissant)
-                        m.appliquerRalentissement(grille[caseI][caseJ] == 6);
-                    }
-                    // Mettre à jour les coordonnées du microbe après déplacement
-                    m.deplacer();
+                // Vérifier que les indices ne dépassent pas les dimensions de la grille de jeu
+                if (caseI >= 0 && caseI < grille.length && caseJ >= 0 && caseJ < grille[0].length) {
+                    // Ralentir le microbe si le microbe se trouve sur une case n°6 (acide ralentissant)
+                    m.appliquerRalentissement(grille[caseI][caseJ] == 6);
+                }
+                // Mettre à jour les coordonnées du microbe après déplacement
+                m.deplacer();
 
-                    // Récupérer l'image correspondante au microbe
-                    MicrobeVue imageVue = vuesMicrobes.get(m);
-                    // Si l'image existe
+                // Récupérer l'image correspondante au microbe
+                MicrobeVue imageVue = vuesMicrobes.get(m);
+                // Si l'image existe
+                if (imageVue != null) {
+                    // Mettre à jour les coordonnées de l'image
+                    imageVue.mettreAJourPosition();
+                }
+
+                // Si le microbe a atteint la sortie
+                if(m.getWaypointCible() == null){
+                    // Mettre à jour le compteur d'infections
+                    env.incrementerInfectes(m);
+                    // Retirer l'image si elle existe
                     if (imageVue != null) {
-                        // Mettre à jour les coordonnées de l'image
-                        imageVue.mettreAJourPosition();
+                        conteneurPrincipal.getChildren().remove(imageVue);
                     }
+                    // Supprimer le microbe du dictionnaire ainsi que la liste des microbes actifs
+                    vuesMicrobes.remove(m);
+                    microbesActifs.remove(i);
+                }
 
-                    // Si le microbe a atteint la sortie
-                    if(m.getWaypointCible() == null){
-                        // Mettre à jour le compteur d'infections
-                        env.incrementerInfectes(m);
-                        // Retirer l'image si elle existe
-                        if (imageVue != null) {
-                            conteneurPrincipal.getChildren().remove(imageVue);
-                        }
-                        // Supprimer le microbe du dictionnaire ainsi que la liste des microbes actifs
-                        vuesMicrobes.remove(m);
-                        microbesActifs.remove(i);
-                    }
+                // 1. --- VERIFICATION DE LA CONDITION DE DEFAITE (MODEL) ---
+                if (env.verifierDefaite()) {
+                    gameLoop.stop();
+                    timeline.stop();
 
-                    if (env.verifierDefaite()) {
-                        // On arrête immédiatement les moteurs du jeu
-                        gameLoop.stop();
-                        timeline.stop();
+                    labelInfectes.getStyleClass().add("compteur-critique");
+                    labelInfectes.setText(String.valueOf(env.getGensInfectes()));
 
-                        // --- AFFICHAGE DE LA VUE (ALERTE POP-UP) ---
-                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                        alert.setTitle("Partie Terminée");
-                        alert.setHeaderText("Epidémie incontrôlable !");
-                        alert.setContentText("Le laboratoire a laissé s'échapper trop de microbes. Le compteur d'humain infectés a atteint " + env.getGensInfectes() + ". Vous avez perdu !");
-                        javafx.application.Platform.runLater(alert::show);
-
-                        return; // On stoppe l'exécution de la frame actuelle
-                    }
+                    afficherEcranDefaite();
+                    return;
                 }
             }
+            }
         };
+    }
+
+    private void afficherEcranDefaite() {
+        // AJOUT : on passe "grilleJeu" en deuxième paramètre
+        DefaiteVue ecranDefaite = new DefaiteVue(conteneurPrincipal, grilleJeu, () -> {
+
+            env = new Environnement();
+            microbesActifs.clear();
+            vuesMicrobes.clear();
+            fileAttenteMicrobes.clear();
+
+            conteneurPrincipal.getChildren().clear();
+            conteneurPrincipal.getChildren().add(grilleJeu);
+
+            TerrainVue terrainVue = new TerrainVue(env.getGrille(), env.getTailleTuile());
+            terrainVue.dessinerTerrain(grilleJeu);
+
+            labelInfectes.getStyleClass().remove("compteur-critique");
+
+            remplirFileAttente();
+            gameLoop.start();
+            timeline.play();
+        });
+
+        ecranDefaite.afficherSur(conteneurPrincipal);
     }
 }
