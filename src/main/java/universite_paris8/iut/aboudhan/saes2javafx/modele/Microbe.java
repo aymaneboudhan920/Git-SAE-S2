@@ -58,6 +58,18 @@ public class Microbe {
         }
     }
 
+    public double getRatioPV(){
+        return (double) pv / pvMax;
+    }
+
+    public void perdreVie(int degats){
+        pv = Math.max(0,pv - degats);
+    }
+
+    public boolean estMort(){
+        return pv <= 0;
+    }
+
     public double getX() {
         return x;
     }
