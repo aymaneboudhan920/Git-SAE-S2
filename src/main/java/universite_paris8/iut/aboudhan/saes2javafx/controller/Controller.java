@@ -167,7 +167,6 @@ public class Controller implements Initializable {
                     microbesActifs.remove(i);
                 }
 
-                // 1. --- VERIFICATION DE LA CONDITION DE DEFAITE (MODEL) ---
                 if (env.verifierDefaite()) {
                     gameLoop.stop();
                     timeline.stop();
@@ -178,6 +177,14 @@ public class Controller implements Initializable {
                     afficherEcranDefaite();
                     return;
                 }
+
+//              if (env.verifierVictoire()) {
+//                  gameLoop.stop();
+//                  timeline.stop();
+//
+//                  afficherEcranVictoire();
+//                  return;
+//              }
             }
         };
     }
@@ -214,5 +221,27 @@ public class Controller implements Initializable {
         });
 
         ecranDefaite.afficherSur(conteneurPrincipal);
+    }
+
+    public void afficherEcranVictoire() {
+        VictoireVue ecranVictoire = new VictoireVue(conteneurPrincipal, grilleJeu, () -> {
+            env = new Environnement();
+            microbesActifs.clear();
+            vuesMicrobes.clear();
+            fileAttenteMicrobes.clear();
+
+            conteneurPrincipal.getChildren().clear();
+            conteneurPrincipal.getChildren().add(grilleJeu);
+
+            TerrainVue terrainVue = new TerrainVue(env.getGrille(), env.getTailleTuile());
+            terrainVue.dessinerTerrain(grilleJeu);
+
+            labelInfectes.getStyleClass().remove("compteur-critique");
+
+            remplirFileAttente();
+            gameLoop.start();
+            timeline.play();
+        });
+        ecranVictoire.afficherSur(conteneurPrincipal);
     }
 }
