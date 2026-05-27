@@ -95,6 +95,23 @@ public class Controller implements Initializable {
         }
     }
 
+    @FXML
+    private void actionBoutonShop(javafx.event.ActionEvent event) {
+        gameLoop.stop();
+        timeline.pause();
+
+        final ShopVue[] shop = new ShopVue[1];
+
+        shop[0] = new ShopVue(() -> {
+            shop[0].cacherDe(conteneurPrincipal);
+
+            gameLoop.start();
+            timeline.play();
+        });
+
+        shop[0].afficherSur(conteneurPrincipal);
+    }
+
     private void creerTimeline() {
         timeline = new Timeline(
                 // Répeter toutes les 3 secondes
