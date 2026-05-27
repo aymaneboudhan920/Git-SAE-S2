@@ -380,7 +380,7 @@
                   </GridPane>
                </graphic>
             </Button>
-            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="180.0" mnemonicParsing="false" styleClass="btn-shop">
+               <Button alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="180.0" mnemonicParsing="false" onAction="#actionBoutonShop" styleClass="btn-shop">
                <VBox.margin>
                   <Insets bottom="40.0" />
                </VBox.margin>
