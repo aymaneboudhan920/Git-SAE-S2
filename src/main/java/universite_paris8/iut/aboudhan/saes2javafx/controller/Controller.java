@@ -97,19 +97,42 @@ public class Controller implements Initializable {
 
     @FXML
     private void actionBoutonShop(javafx.event.ActionEvent event) {
-        gameLoop.stop();
-        timeline.pause();
+        if (shopActuel != null) {
+            shopActuel.cacherDe(conteneurPrincipal);
 
-        final ShopVue[] shop = new ShopVue[1];
+            //On relance les moteurs UNIQUEMENT si le jeu a déjà été démarré par le bouton START
+            if (jeuDemarre) {
+                gameLoop.start();
+                timeline.play();
+            }
 
-        shop[0] = new ShopVue(() -> {
-            shop[0].cacherDe(conteneurPrincipal);
+            shopActuel = null;
+            return;
+        }
 
-            gameLoop.start();
-            timeline.play();
+        // On met en pause uniquement si le jeu est en train de tourner
+        if (jeuDemarre) {
+            gameLoop.stop();
+            timeline.pause();
+        }
+
+        // On crée l'interface du shop
+        shopActuel = new ShopVue(() -> {
+            // Ce code s'exécute si le joueur clique sur la croix "X"
+            if (shopActuel != null) {
+                shopActuel.cacherDe(conteneurPrincipal);
+
+                // On ne relance que si le bouton START a déjà été cliqué au moins une fois
+                if (jeuDemarre) {
+                    gameLoop.start();
+                    timeline.play();
+                }
+
+                shopActuel = null;
+            }
         });
 
-        shop[0].afficherSur(conteneurPrincipal);
+        shopActuel.afficherSur(conteneurPrincipal);
     }
 
     private void creerTimeline() {
