@@ -312,7 +312,7 @@
             <Insets top="20.0" />
          </padding>
          <children>
-            <Label alignment="CENTER" contentDisplay="CENTER" text="VAGUE 1" textAlignment="CENTER" textFill="WHITE">
+            <Label fx:id="labelVague" alignment="CENTER" contentDisplay="CENTER" text="VAGUE 1" textAlignment="CENTER" textFill="WHITE">
                <VBox.margin>
                   <Insets bottom="20.0" />
                </VBox.margin>
@@ -380,7 +380,7 @@
                   </GridPane>
                </graphic>
             </Button>
-               <Button alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="180.0" mnemonicParsing="false" onAction="#actionBoutonShop" styleClass="btn-shop">
+            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="180.0" mnemonicParsing="false" onAction="#actionBoutonShop" styleClass="btn-shop">               
                <VBox.margin>
                   <Insets bottom="40.0" />
                </VBox.margin>
@@ -471,7 +471,7 @@
                   </Button>
                </children>
             </GridPane>
-            <Button layoutX="10.0" layoutY="271.0" mnemonicParsing="false" onAction="#actionBoutonStart" styleClass="btn-start">
+            <Button fx:id="boutonStart" layoutX="10.0" layoutY="271.0" mnemonicParsing="false" onAction="#actionBoutonStart" styleClass="btn-start">
                <VBox.margin>
                   <Insets bottom="15.0" top="40.0" />
                </VBox.margin>
