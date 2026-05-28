@@ -194,7 +194,7 @@ public class Controller implements Initializable {
                 // Si l'image existe
                 if (imageVue != null) {
                     // Mettre à jour les coordonnées de l'image
-                    imageVue.mettreAJourPosition();
+                    imageVue.mettreAJour();
                 }
 
                 // Si le microbe a atteint la sortie
