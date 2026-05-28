@@ -127,6 +127,11 @@ public class Controller implements Initializable {
         shopActuel.afficherSur(conteneurPrincipal);
     }
 
+    private void mettreAJourLabelVague() {
+        int numeroActuel = env.getGestionnaireVagues().getNumVagueActu() + 1;
+        labelVague.setText("VAGUE " + numeroActuel);
+    }
+    
     private void creerTimeline() {
         Vague vagueActuelle = env.getGestionnaireVagues().getVagueActuelle();
 
