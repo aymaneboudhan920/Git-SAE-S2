@@ -37,6 +37,9 @@ public class Controller implements Initializable {
     private final List<Microbe> fileAttenteMicrobes = new ArrayList<>();
     private boolean jeuDemarre = false;
 
+     // INTERRUPTEUR : Garde en mémoire le shop s'il est affiché à l'écran
+    private ShopVue shopActuel = null;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // On passe la grille et la taille des tuiles de l'environnement à la vue du terrain
