@@ -15,6 +15,7 @@ import javafx.util.Duration;
 
 import universite_paris8.iut.aboudhan.saes2javafx.modele.Microbe;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.Environnement;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.Vague;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.DefaiteVue;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.TerrainVue;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.MicrobeVue;
@@ -25,8 +26,9 @@ public class Controller implements Initializable {
     @FXML private TilePane grilleJeu;
     @FXML private Label labelArgent;
     @FXML private Label labelInfectes;
+    @FXML private Label labelVague;
+    @FXML private Button boutonStart;
 
-    // Le contrôleur instancie son modèle global : l'environnement
     private Environnement env = new Environnement();
 
     private final List<Microbe> microbesActifs = new ArrayList<>();
@@ -34,7 +36,6 @@ public class Controller implements Initializable {
 
     private AnimationTimer gameLoop;
     private Timeline timeline;
-    private final List<Microbe> fileAttenteMicrobes = new ArrayList<>();
     private boolean jeuDemarre = false;
 
      // INTERRUPTEUR : Garde en mémoire le shop s'il est affiché à l'écran
@@ -46,55 +47,43 @@ public class Controller implements Initializable {
         TerrainVue terrainVue = new TerrainVue(env.getGrille(), env.getTailleTuile());
         terrainVue.dessinerTerrain(grilleJeu);
 
-        // On ajoute les microbes à la file
-        remplirFileAttente();
+        // Lancement des vagues
+        env.getGestionnaireVagues().initialiserVagues(env);
 
         // Création de la loop et de la timeline
         creerGameLoop();
         creerTimeline();
-    }
-
-    private void remplirFileAttente() {
-        String prefixe = "/universite_paris8/iut/aboudhan/saes2javafx/vue/";
-
-        // C'est maintenant l'environnement qui génère l'itinéraire de chaque microbe
-        fileAttenteMicrobes.add(new Microbe(0.8, 30, 2, 1,prefixe + "rhinovirus.png", env.creerItineraireAleatoire()));
-        fileAttenteMicrobes.add(new Microbe(1, 40, 3, 1, prefixe + "norovirus.png", env.creerItineraireAleatoire()));
-        fileAttenteMicrobes.add(new Microbe(0.9, 60, 5, 2, prefixe + "streptocoque.png", env.creerItineraireAleatoire()));
-        fileAttenteMicrobes.add(new Microbe(0.7, 10, 10, 3, prefixe + "influenza.png", env.creerItineraireAleatoire()));
-        fileAttenteMicrobes.add(new Microbe(1, 120, 15, 5, prefixe + "varicelle.png", env.creerItineraireAleatoire()));
-        fileAttenteMicrobes.add(new Microbe(0.8, 200, 20, 8, prefixe + "covid.png", env.creerItineraireAleatoire()));
-        fileAttenteMicrobes.add(new Microbe(0.6, 250, 30, 10, prefixe + "vih.png", env.creerItineraireAleatoire()));
-        fileAttenteMicrobes.add(new Microbe(0.5, 600, 40, 12, prefixe + "tuberculose.png", env.creerItineraireAleatoire()));
-        fileAttenteMicrobes.add(new Microbe(0.8, 450, 50, 20, prefixe + "peste.png", env.creerItineraireAleatoire()));
-        fileAttenteMicrobes.add(new Microbe(1, 300, 70, 15, prefixe + "rage.png", env.creerItineraireAleatoire()));
-        fileAttenteMicrobes.add(new Microbe(0.3, 2000, 100, 50, prefixe + "variole.png", env.creerItineraireAleatoire()));
+        mettreAJourLabelVague();
     }
 
     @FXML
     private void actionBoutonStart(javafx.event.ActionEvent event) {
-        if (!jeuDemarre) { // Vérification que le jeu n'est pas déjà lancé dans le cas d'un double clic sur le bouton
+        if (!jeuDemarre) {
             jeuDemarre = true;
 
-            Button boutonSource = (Button) event.getSource();
+            if (boutonStart != null) {
+                // Animation de clic
+                ScaleTransition st = new ScaleTransition(Duration.millis(100), boutonStart);
+                st.setToX(0.95);
+                st.setToY(0.95);
+                st.setAutoReverse(true);
+                st.setCycleCount(2);
 
-            // Animation de clic sur le bouton Start
-            ScaleTransition st = new ScaleTransition(Duration.millis(100), boutonSource); // Durée de l'animation -> 100 Ms
-            // Réduction de la taille du bouton à 95%
-            st.setToX(0.95);
-            st.setToY(0.95);
-            // Effet inverse
-            st.setAutoReverse(true);
-            // 2 pour l'aller et le retour
-            st.setCycleCount(2);
+                // on désactive le bouton et on lance les microbes après animation
+                st.setOnFinished(e -> {
+                    boutonStart.setDisable(true);
 
-            // Désactiver le bouton après clic
-            st.setOnFinished(e -> boutonSource.setDisable(true));
-            st.play();
-
-            // Démarrage de la loop
-            gameLoop.start();
-            timeline.play();
+                    creerTimeline();
+                    if (timeline != null) {
+                        gameLoop.start();
+                        timeline.play();
+                    } else {
+                        jeuDemarre = false;
+                        boutonStart.setDisable(false);
+                    }
+                });
+                st.play();
+            }
         }
     }
 
@@ -139,26 +128,31 @@ public class Controller implements Initializable {
     }
 
     private void creerTimeline() {
+        Vague vagueActuelle = env.getGestionnaireVagues().getVagueActuelle();
+
+        // Sécurité : Si le modèle n'a pas de vagues chargées, on ne fait rien
+        if (vagueActuelle == null) {
+            return;
+        }
+
+        double intervalle = vagueActuelle.getTempsIntervalle();
+
         timeline = new Timeline(
-                // Répeter toutes les 3 secondes
-                new KeyFrame(Duration.seconds(3), event -> {
-                    // Si il reste encore des microbes à ajouter dans la map
-                    if (!fileAttenteMicrobes.isEmpty()) {
-                        // Prendre le premier microbe de la file d'attente et l'ajouter dans la liste des microbes actifs
-                        Microbe prochainMicrobe = fileAttenteMicrobes.remove(0);
+                new KeyFrame(Duration.seconds(intervalle), event -> {
+                    List<Microbe> fileAttente = vagueActuelle.getFileAttenteMicrobes();
+
+                    if (!fileAttente.isEmpty()) {
+                        Microbe prochainMicrobe = fileAttente.remove(0);
                         microbesActifs.add(prochainMicrobe);
 
                         MicrobeVue vue = new MicrobeVue(prochainMicrobe);
-                        // Ajouter le microbe et son image correspondante au dictionnaire
                         vuesMicrobes.put(prochainMicrobe, vue);
                         conteneurPrincipal.getChildren().add(vue);
                     } else {
-                        // Si la file d'attente est vide, on arrête la Timeline
                         timeline.stop();
                     }
                 })
         );
-        // Répéter en boucle tant qu'on ne l'arrête pas
         timeline.setCycleCount(Animation.INDEFINITE);
     }
 
@@ -166,6 +160,41 @@ public class Controller implements Initializable {
         gameLoop = new AnimationTimer() {
             @Override
             public void handle(long now) {
+            if (env.verifierDefaite()) {
+                gameLoop.stop();
+                if (timeline != null)
+                    timeline.stop();
+
+                labelInfectes.getStyleClass().add("compteur-critique");
+                labelInfectes.setText(String.valueOf(env.getGensInfectes()));
+
+                afficherEcranDefaite();
+                return;
+            }
+
+            // Vérification de fin de vague
+            Vague vagueActuelle = env.getGestionnaireVagues().getVagueActuelle();
+            if (vagueActuelle != null && vagueActuelle.getFileAttenteMicrobes().isEmpty() && microbesActifs.isEmpty() && jeuDemarre) {
+                jeuDemarre = false;
+                gameLoop.stop();
+
+                // Distribution du bonus de fin de vague
+                env.ajouterArgent(vagueActuelle.getBonus());
+
+                // Vérification de la victoire finale
+                if (env.getGestionnaireVagues().estDerniereVague()) {
+                    // Ajouter EcranVictoire ici
+                } else {
+                    // On passe au numéro de vague suivant
+                    env.getGestionnaireVagues().AugmenterVague();
+                    System.out.println("Vague terminée ! Prêt pour la vague : " + (env.getGestionnaireVagues().getNumVagueActu() + 1));
+
+                    if (boutonStart != null) {
+                        boutonStart.setDisable(false);
+                        boutonStart.setText("Lancer Vague " + (env.getGestionnaireVagues().getNumVagueActu() + 1));
+                    }
+                }
+            }
             int[][] grille = env.getGrille();
             int tailleTuile = env.getTailleTuile();
 
@@ -194,7 +223,7 @@ public class Controller implements Initializable {
                 // Si l'image existe
                 if (imageVue != null) {
                     // Mettre à jour les coordonnées de l'image
-                    imageVue.mettreAJour();
+                    imageVue.mettreAJourPosition();
                 }
 
                 // Si le microbe a atteint la sortie
@@ -209,18 +238,6 @@ public class Controller implements Initializable {
                     vuesMicrobes.remove(m);
                     microbesActifs.remove(i);
                 }
-
-                if (env.verifierDefaite()) {
-                    gameLoop.stop();
-                    timeline.stop();
-
-                    labelInfectes.getStyleClass().add("compteur-critique");
-                    labelInfectes.setText(String.valueOf(env.getGensInfectes()));
-
-                    afficherEcranDefaite();
-                    return;
-                }
-
 //              if (env.verifierVictoire()) {
 //                  gameLoop.stop();
 //                  timeline.stop();
@@ -228,7 +245,6 @@ public class Controller implements Initializable {
 //                  afficherEcranVictoire();
 //                  return;
 //              }
-                }
             }
         };
     }
@@ -245,11 +261,9 @@ public class Controller implements Initializable {
 
     private void afficherEcranDefaite() {
         DefaiteVue ecranDefaite = new DefaiteVue(conteneurPrincipal, grilleJeu, () -> {
-
             env = new Environnement();
             microbesActifs.clear();
             vuesMicrobes.clear();
-            fileAttenteMicrobes.clear();
 
             conteneurPrincipal.getChildren().clear();
             conteneurPrincipal.getChildren().add(grilleJeu);
@@ -259,11 +273,17 @@ public class Controller implements Initializable {
 
             labelInfectes.getStyleClass().remove("compteur-defaite");
 
-            remplirFileAttente();
-            gameLoop.start();
-            timeline.play();
-        });
+            // Réinitialisation complète du gestionnaire de vagues
+            env.getGestionnaireVagues().initialiserVagues(env);
+            jeuDemarre = false;
 
+            if (boutonStart != null) {
+                boutonStart.setDisable(false);
+                boutonStart.setText("Lancer Vague 1");
+            }
+
+            creerGameLoop();
+        });
         ecranDefaite.afficherSur(conteneurPrincipal);
     }
 
