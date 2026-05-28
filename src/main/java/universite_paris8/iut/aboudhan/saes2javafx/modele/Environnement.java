@@ -10,10 +10,13 @@ public class Environnement {
     private final int tailleTuile;
     private int argent = 100, gensInfectes = 0;
 
+    private final GestionnaireVagues gestionnaireVagues;
+
     public Environnement() {
         this.terrain = new Terrain();
         this.grille = this.terrain.grille;
         this.tailleTuile = 34;
+        this.gestionnaireVagues = new GestionnaireVagues();
     }
 
     // GETTERS
@@ -31,6 +34,10 @@ public class Environnement {
 
     public int getGensInfectes() {
         return gensInfectes;
+    }
+
+    public GestionnaireVagues getGestionnaireVagues() {
+        return gestionnaireVagues;
     }
 
     public Waypoint creerItineraireAleatoire() {
