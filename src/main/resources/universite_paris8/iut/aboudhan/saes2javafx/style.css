@@ -168,3 +168,8 @@
     -fx-scale-x: 0.95;
     -fx-scale-y: 0.95;
 }
+
+.barre-vie-microbe .track {
+    -fx-background-color: rgb(39, 214, 4);
+    -fx-background-radius: 2px;
+}
