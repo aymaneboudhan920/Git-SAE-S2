@@ -1,5 +1,8 @@
 package universite_paris8.iut.aboudhan.saes2javafx.vue;
 
+import javafx.geometry.Pos;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.VBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.Microbe;
@@ -11,7 +14,7 @@ public class MicrobeVue extends ImageView {
     private VBox conteneurGraphique;
 
     public MicrobeVue(Microbe m) {
-        this.modele = m;
+        this.microbe = m;
 
         //Pour barre de vie
         this.barreDeVie = new ProgressBar(microbe.getRatioPV());
@@ -42,7 +45,7 @@ public class MicrobeVue extends ImageView {
         this.setTranslateX(this.microbe.getX());
         this.setTranslateY(this.microbe.getY());
         // Met à jour le remplissage de la jauge (entre 0.0 et 1.0)
-        this.barreDeVie.setProgress(modele.getRatioPV());
+        this.barreDeVie.setProgress(microbe.getRatioPV());
     }
 
     public VBox getConteneurGraphique(){
