@@ -298,7 +298,9 @@ public class Controller implements Initializable {
             env = new Environnement();
             microbesActifs.clear();
             vuesMicrobes.clear();
-            fileAttenteMicrobes.clear();
+
+            env.getGestionnaireVagues().listeVagues.clear();
+            env.getGestionnaireVagues().numVagueActu = 0;
 
             conteneurPrincipal.getChildren().clear();
             conteneurPrincipal.getChildren().add(grilleJeu);
@@ -308,9 +310,16 @@ public class Controller implements Initializable {
 
             labelInfectes.getStyleClass().remove("compteur-critique");
 
-            remplirFileAttente();
-            gameLoop.start();
-            timeline.play();
+            env.getGestionnaireVagues().initialiserVagues(env);
+            jeuDemarre = false;
+
+            if (boutonStart != null) {
+                boutonStart.setDisable(false);
+                boutonStart.setText("Lancer Vague 1");
+            }
+
+            mettreAJourLabelVague();
+            creerGameLoop();
         });
         ecranVictoire.afficherSur(conteneurPrincipal);
     }
