@@ -31,13 +31,15 @@ public class Controller implements Initializable {
 
     private final List<Microbe> microbesActifs = new ArrayList<>();
     private final java.util.Map<Microbe, MicrobeVue> vuesMicrobes = new java.util.HashMap<>();
+    private final java.util.Map<universite_paris8.iut.aboudhan.saes2javafx.modele.Tours, ToursVue> vuesTours = new java.util.HashMap<>();
+
 
     private AnimationTimer gameLoop;
     private Timeline timeline;
     private boolean jeuDemarre = false;
-
-    // INTERRUPTEUR : Garde en mémoire le shop s'il est affiché à l'écran
     private ShopVue shopActuel = null;
+    private boolean modePlacementTour = false;
+    private String typeTourEnCoursAchat = "";
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -147,28 +149,28 @@ public class Controller implements Initializable {
 
         // On crée l'interface du shop
         shopActuel = new ShopVue(
-            () -> {
-                // Ce code s'exécute si le joueur clique sur la croix "X"
-                if (shopActuel != null) {
-                    shopActuel.cacher(conteneurPrincipal);
-    
-                    // On ne relance que si le bouton START a déjà été cliqué au moins une fois
-                    if (jeuDemarre) {
-                        gameLoop.start();
-                        timeline.play();
+                () -> {
+                    // Ce code s'exécute si le joueur clique sur la croix "X"
+                    if (shopActuel != null) {
+                        shopActuel.cacher(conteneurPrincipal);
+
+                        // On ne relance que si le bouton START a déjà été cliqué au moins une fois
+                        if (jeuDemarre) {
+                            gameLoop.start();
+                            timeline.play();
+                        }
+
+                        shopActuel = null;
                     }
-    
-                    shopActuel = null;
+                },
+                () -> {
+                    this.modePlacementTour = true;
+                    this.typeTourEnCoursAchat = "scientifique";
+
+                    this.shopActuel = null;
+
+                    System.out.println("Mode placement activé : Cliquez sur une case du terrain !");
                 }
-            },
-            () -> {
-                this.modePlacementTour = true;
-                this.typeTourEnCoursAchat = "scientifique";
-
-                this.shopActuel = null;
-
-                System.out.println("Mode placement activé : Cliquez sur une case du terrain !");
-            }
         );
         shopActuel.afficherSur(conteneurPrincipal);
     }
@@ -368,5 +370,19 @@ public class Controller implements Initializable {
             creerGameLoop();
         });
         ecranVictoire.afficherSur(conteneurPrincipal);
+    }
+    
+    public void ajouterTourSurTerrain(int caseX, int caseY, int portee, int degats, double vitesse, String nomImage) {
+        int tailleTuile = env.getTailleTuile();
+        double pixelX = caseX * tailleTuile;
+        double pixelY = caseY * tailleTuile;
+        universite_paris8.iut.aboudhan.saes2javafx.modele.Tours nouvelleTour =
+                new universite_paris8.iut.aboudhan.saes2javafx.modele.Tours(pixelX, pixelY, portee, degats, vitesse, nomImage);
+        ToursVue nouvelleTourVue = new ToursVue(nouvelleTour);
+        vuesTours.put(nouvelleTour, nouvelleTourVue);
+
+        conteneurPrincipal.getChildren().add(nouvelleTourVue);
+
+        System.out.println("Tour posée avec succès en case [" + caseX + ", " + caseY + "]");
     }
 }
