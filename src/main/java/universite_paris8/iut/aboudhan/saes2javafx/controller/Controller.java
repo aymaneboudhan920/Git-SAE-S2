@@ -43,17 +43,55 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // On passe la grille et la taille des tuiles de l'environnement à la vue du terrain
-        TerrainVue terrainVue = new TerrainVue(env.getGrille(), env.getTailleTuile());
+         TerrainVue terrainVue = new TerrainVue(env.getGrille(), env.getTailleTuile());
         terrainVue.dessinerTerrain(grilleJeu);
 
-        // Lancement des vagues
         env.getGestionnaireVagues().initialiserVagues(env);
 
-        // Création de la loop et de la timeline
         creerGameLoop();
         creerTimeline();
         mettreAJourLabelVague();
+
+        grilleJeu.setOnMouseClicked(event -> {
+            if (!modePlacementTour) {
+                return;
+            }
+
+            int tailleTuile = env.getTailleTuile();
+
+            int caseX = (int) (event.getX() / tailleTuile);
+            int caseY = (int) (event.getY() / tailleTuile);
+
+            int[][] grille = env.getGrille();
+
+            if (caseY >= 0 && caseY < grille.length && caseX >= 0 && caseX < grille[0].length) {
+
+                if (grille[caseY][caseX] == 0) {
+
+                    if (typeTourEnCoursAchat.equals("scientifique")) {
+                        int portee = 120;
+                        int degats = 15;
+                        double vitesse = 1.2;
+                        String image = "/universite_paris8/iut/aboudhan/saes2javafx/vue/tour_scientifique.png";
+
+                        ajouterTourSurTerrain(caseX, caseY, portee, degats, vitesse, image);
+
+                        grille[caseY][caseX] = 99;
+                        modePlacementTour = false;
+                        typeTourEnCoursAchat = "";
+
+                        if (!jeuDemarre && boutonStart != null) {
+                            boutonStart.setDisable(false);
+                        }
+
+                        actionBoutonShop(null);
+                    }
+
+                } else {
+                    System.out.println("Impossible de poser une tour ici, la case ne vaut pas 0 ! (Valeur actuelle : " + grille[caseY][caseX] + ")");
+                }
+            }
+        });
     }
 
     @FXML
@@ -122,7 +160,16 @@ public class Controller implements Initializable {
 
                 shopActuel = null;
             }
-        });
+        },
+        () -> {
+            this.modePlacementTour = true;
+            this.typeTourEnCoursAchat = "scientifique";
+
+            this.shopActuel = null;
+
+            System.out.println("Mode placement activé : Cliquez sur une case du terrain !");
+        }
+    );
 
         shopActuel.afficherSur(conteneurPrincipal);
     }
