@@ -11,28 +11,27 @@ import java.io.InputStream;
 
 public class ShopVue {
 
-    private StackPane rootShop; // Conteneur global (fond flou + menu)
+    private StackPane rootShop;
     private VBox menuInterieur;
     private Runnable actionFermer;
+    private Runnable actionClicScientifique;
 
-    public ShopVue(Runnable actionFermer) {
+    public ShopVue(Runnable actionFermer, Runnable actionClicScientifique) {
         this.actionFermer = actionFermer;
+        this.actionClicScientifique = actionClicScientifique;
         creerInterface();
     }
 
     private void creerInterface() {
-        // Fond transparent de la scène
         rootShop = new StackPane();
         rootShop.setPrefSize(1020, 680);
         rootShop.getStyleClass().add("fond-flou-shop");
 
-        // Fenêtre du menu central
         menuInterieur = new VBox(20);
         menuInterieur.setAlignment(Pos.CENTER);
-        menuInterieur.setMaxSize(850, 550); // Légèrement agrandi pour accueillir 4 tours de large
+        menuInterieur.setMaxSize(850, 550);
         menuInterieur.getStyleClass().add("fenetre-shop");
 
-        // titre + bouton fermer
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_RIGHT);
 
@@ -43,11 +42,10 @@ public class ShopVue {
         btnFermer.getStyleClass().add("btn-fermer-shop");
         btnFermer.setPrefSize(35, 35);
 
-        // CORRECTION 2 : Quand on clique sur X, le shop s'enlève de l'écran TOUT SEUL, puis relance le jeu
         btnFermer.setOnAction(e -> {
             Pane parent = (Pane) rootShop.getParent();
             if (parent != null) {
-                cacherDe(parent);
+                cacher(parent);
             }
             actionFermer.run();
         });
@@ -56,18 +54,32 @@ public class ShopVue {
         HBox.setHgrow(spacer, Priority.ALWAYS);
         header.getChildren().addAll(titre, spacer, btnFermer);
 
-        // Section 1 : Les Tours
+        // Les Tours
         VBox sectionTours = creerSection("TOURS DE DÉFENSE", "titre-categorie-tours");
         HBox containerTours = new HBox(15);
         containerTours.setAlignment(Pos.CENTER);
+
+        Button btnScientifique = creerItem("Scientifique", "tour_scientifique.png", "100$");
+        btnScientifique.setOnAction(e -> {
+            Pane parent = (Pane) rootShop.getParent();
+            if (parent != null) {
+                cacher(parent);
+            }
+            if (actionClicScientifique != null) {
+                actionClicScientifique.run();
+            } else {
+                System.out.println("Erreur : l'action clic scientifique est null dans ShopVue !");
+            }
+        });
+
         containerTours.getChildren().addAll(
-                creerItem("Scientifique", "tour_scientifique.png", "100$"),
+                btnScientifique,
                 creerItem("Chimiste", "tour_chimiste.png", "200$"),
                 creerItem("Rayon_X", "rayon_x.png", "250$"),
                 creerItem("Scanner", "scanner.png", "250$")
         );
 
-        // Section 2 : Les Potions
+        // Les Potions
         VBox sectionPotions = creerSection("POTIONS", "titre-categorie-potions");
         HBox containerPotions = new HBox(15);
         containerPotions.setAlignment(Pos.CENTER);
@@ -77,7 +89,6 @@ public class ShopVue {
                 creerItem("Gel", "potion_gel.png", "30$")
         );
 
-        // Assemblage final
         menuInterieur.getChildren().addAll(header, sectionTours, containerTours, sectionPotions, containerPotions);
         rootShop.getChildren().add(menuInterieur);
     }
@@ -128,15 +139,14 @@ public class ShopVue {
         if (!parent.getChildren().isEmpty()) {
             parent.getChildren().get(0).setEffect(new BoxBlur(5, 5, 3));
         }
-        // Évite d'ajouter deux fois le shop si on clique comme un fou
         if (!parent.getChildren().contains(rootShop)) {
             parent.getChildren().add(rootShop);
         }
     }
 
-    public void cacherDe(Pane parent) {
+    public void cacher(Pane parent) {
         if (!parent.getChildren().isEmpty()) {
-            parent.getChildren().get(0).setEffect(null); // Retire le flou
+            parent.getChildren().get(0).setEffect(null);
         }
         parent.getChildren().remove(rootShop);
     }
