@@ -378,7 +378,7 @@ public class Controller implements Initializable {
         double pixelY = caseY * tailleTuile;
         universite_paris8.iut.aboudhan.saes2javafx.modele.Tours nouvelleTour =
                 new universite_paris8.iut.aboudhan.saes2javafx.modele.Tours(pixelX, pixelY, portee, degats, vitesse, nomImage);
-        ToursVue nouvelleTourVue = new ToursVue(nouvelleTour);
+        TourVue nouvelleTourVue = new TourVue(nouvelleTour);
         vuesTours.put(nouvelleTour, nouvelleTourVue);
 
         conteneurPrincipal.getChildren().add(nouvelleTourVue);
