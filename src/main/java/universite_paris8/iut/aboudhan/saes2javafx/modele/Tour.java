@@ -1,13 +1,13 @@
 package universite_paris8.iut.aboudhan.saes2javafx.modele;
 
-public class Tours {
+public class Tour {
     private double x, y;
     private int portee;
     private int degats;
     private String nomImage;
     private double v;
 
-    public Tours(double x, double y, int portee, int degats, double v, String nomImage) {
+    public Tour(double x, double y, int portee, int degats, double v, String nomImage) {
         this.x = x;
         this.y = y;
         this.portee = portee;
