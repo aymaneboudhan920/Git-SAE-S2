@@ -31,7 +31,7 @@ public class Controller implements Initializable {
 
     private final List<Microbe> microbesActifs = new ArrayList<>();
     private final java.util.Map<Microbe, MicrobeVue> vuesMicrobes = new java.util.HashMap<>();
-    private final java.util.Map<universite_paris8.iut.aboudhan.saes2javafx.modele.Tours, ToursVue> vuesTours = new java.util.HashMap<>();
+    private final java.util.Map<universite_paris8.iut.aboudhan.saes2javafx.modele.Tour, TourVue> vuesTours = new java.util.HashMap<>();
 
 
     private AnimationTimer gameLoop;
@@ -376,8 +376,8 @@ public class Controller implements Initializable {
         int tailleTuile = env.getTailleTuile();
         double pixelX = caseX * tailleTuile;
         double pixelY = caseY * tailleTuile;
-        universite_paris8.iut.aboudhan.saes2javafx.modele.Tours nouvelleTour =
-                new universite_paris8.iut.aboudhan.saes2javafx.modele.Tours(pixelX, pixelY, portee, degats, vitesse, nomImage);
+        universite_paris8.iut.aboudhan.saes2javafx.modele.Tour nouvelleTour =
+                new universite_paris8.iut.aboudhan.saes2javafx.modele.Tour(pixelX, pixelY, portee, degats, vitesse, nomImage);
         TourVue nouvelleTourVue = new TourVue(nouvelleTour);
         vuesTours.put(nouvelleTour, nouvelleTourVue);
 
