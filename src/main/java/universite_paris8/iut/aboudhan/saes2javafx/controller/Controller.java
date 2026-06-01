@@ -16,9 +16,7 @@ import javafx.util.Duration;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.Microbe;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.Environnement;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.Vague;
-import universite_paris8.iut.aboudhan.saes2javafx.vue.DefaiteVue;
-import universite_paris8.iut.aboudhan.saes2javafx.vue.TerrainVue;
-import universite_paris8.iut.aboudhan.saes2javafx.vue.MicrobeVue;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.*;
 
 public class Controller implements Initializable {
 
@@ -33,17 +31,20 @@ public class Controller implements Initializable {
 
     private final List<Microbe> microbesActifs = new ArrayList<>();
     private final java.util.Map<Microbe, MicrobeVue> vuesMicrobes = new java.util.HashMap<>();
+    private final java.util.Map<universite_paris8.iut.aboudhan.saes2javafx.modele.Tours, ToursVue> vuesTours = new java.util.HashMap<>();
 
     private AnimationTimer gameLoop;
     private Timeline timeline;
     private boolean jeuDemarre = false;
 
-     // INTERRUPTEUR : Garde en mémoire le shop s'il est affiché à l'écran
     private ShopVue shopActuel = null;
+    private boolean modePlacementTour = false;
+    private String typeTourEnCoursAchat = "";
 
     @Override
+    
     public void initialize(URL location, ResourceBundle resources) {
-         TerrainVue terrainVue = new TerrainVue(env.getGrille(), env.getTailleTuile());
+        TerrainVue terrainVue = new TerrainVue(env.getGrille(), env.getTailleTuile());
         terrainVue.dessinerTerrain(grilleJeu);
 
         env.getGestionnaireVagues().initialiserVagues(env);
@@ -130,7 +131,7 @@ public class Controller implements Initializable {
         if (shopActuel != null) {
             shopActuel.cacherDe(conteneurPrincipal);
 
-            //On relance les moteurs UNIQUEMENT si le jeu a déjà été démarré par le bouton START
+            // On relance les moteurs UNIQUEMENT si le jeu a déjà été démarré par le bouton START
             if (jeuDemarre) {
                 gameLoop.start();
                 timeline.play();
@@ -146,30 +147,30 @@ public class Controller implements Initializable {
             timeline.pause();
         }
 
-        // On crée l'interface du shop
-        shopActuel = new ShopVue(() -> {
-            // Ce code s'exécute si le joueur clique sur la croix "X"
-            if (shopActuel != null) {
-                shopActuel.cacherDe(conteneurPrincipal);
+        shopActuel = new ShopVue(
+                () -> {
+                    // PARAMÈTRE 1 (actionFermer) : S'exécute si le joueur clique sur la croix "X"
+                    if (shopActuel != null) {
+                        shopActuel.cacherDe(conteneurPrincipal);
 
-                // On ne relance que si le bouton START a déjà été cliqué au moins une fois
-                if (jeuDemarre) {
-                    gameLoop.start();
-                    timeline.play();
+                        // On ne relance que si le bouton START a déjà été cliqué au moins une fois
+                        if (jeuDemarre) {
+                            gameLoop.start();
+                            timeline.play();
+                        }
+
+                        shopActuel = null;
+                    }
+                },
+                () -> {
+                    this.modePlacementTour = true;
+                    this.typeTourEnCoursAchat = "scientifique";
+
+                    this.shopActuel = null;
+
+                    System.out.println("Mode placement activé : Cliquez sur une case du terrain !");
                 }
-
-                shopActuel = null;
-            }
-        },
-        () -> {
-            this.modePlacementTour = true;
-            this.typeTourEnCoursAchat = "scientifique";
-
-            this.shopActuel = null;
-
-            System.out.println("Mode placement activé : Cliquez sur une case du terrain !");
-        }
-    );
+        );
 
         shopActuel.afficherSur(conteneurPrincipal);
     }
@@ -178,7 +179,7 @@ public class Controller implements Initializable {
         int numeroActuel = env.getGestionnaireVagues().getNumVagueActu() + 1;
         labelVague.setText("VAGUE " + numeroActuel);
     }
-    
+
     private void creerTimeline() {
         Vague vagueActuelle = env.getGestionnaireVagues().getVagueActuelle();
 
@@ -212,92 +213,84 @@ public class Controller implements Initializable {
         gameLoop = new AnimationTimer() {
             @Override
             public void handle(long now) {
-            if (env.verifierDefaite()) {
-                gameLoop.stop();
-                if (timeline != null)
-                    timeline.stop();
+                if (env.verifierDefaite()) {
+                    gameLoop.stop();
+                    if (timeline != null)
+                        timeline.stop();
 
-                labelInfectes.getStyleClass().add("compteur-critique");
+                    labelInfectes.getStyleClass().add("compteur-critique");
+                    labelInfectes.setText(String.valueOf(env.getGensInfectes()));
+
+                    afficherEcranDefaite();
+                    return;
+                }
+
+                // Vérification de fin de vague
+                Vague vagueActuelle = env.getGestionnaireVagues().getVagueActuelle();
+                if (vagueActuelle != null && vagueActuelle.getFileAttenteMicrobes().isEmpty() && microbesActifs.isEmpty() && jeuDemarre) {
+                    jeuDemarre = false;
+                    gameLoop.stop();
+
+                    // Distribution du bonus de fin de vague
+                    env.ajouterArgent(vagueActuelle.getBonus());
+
+                    // Vérification de la victoire finale
+                    if (env.getGestionnaireVagues().estDerniereVague()) {
+                        afficherEcranVictoire(); // CORRECTION : Déclenchement de l'écran de victoire
+                        return;
+                    } else {
+                        // On passe au numéro de vague suivant
+                        env.getGestionnaireVagues().AugmenterVague();
+                        mettreAJourLabelVague(); // CORRECTION : Met à jour l'UI (ex: VAGUE 2)
+
+                        if (boutonStart != null) {
+                            boutonStart.setDisable(false);
+                            boutonStart.setText("Lancer Vague " + (env.getGestionnaireVagues().getNumVagueActu() + 1));
+                        }
+                    }
+                }
+
+                int[][] grille = env.getGrille();
+                int tailleTuile = env.getTailleTuile();
+
+                // Compteurs dynamiques
+                labelArgent.setText(String.valueOf(env.getArgent()));
                 labelInfectes.setText(String.valueOf(env.getGensInfectes()));
 
-                afficherEcranDefaite();
-                return;
-            }
+                changerCouleurCompteur(env.getGensInfectes());
 
-            // Vérification de fin de vague
-            Vague vagueActuelle = env.getGestionnaireVagues().getVagueActuelle();
-            if (vagueActuelle != null && vagueActuelle.getFileAttenteMicrobes().isEmpty() && microbesActifs.isEmpty() && jeuDemarre) {
-                jeuDemarre = false;
-                gameLoop.stop();
+                // Parcourir tous les microbes actifs
+                for (int i = microbesActifs.size() - 1; i >= 0; i--) {
+                    Microbe m = microbesActifs.get(i);
+                    int caseJ = (int) (m.getX() / tailleTuile);
+                    int caseI = (int) (m.getY() / tailleTuile);
 
-                // Distribution du bonus de fin de vague
-                env.ajouterArgent(vagueActuelle.getBonus());
-
-                // Vérification de la victoire finale
-                if (env.getGestionnaireVagues().estDerniereVague()) {
-                    // Ajouter EcranVictoire ici
-                } else {
-                    // On passe au numéro de vague suivant
-                    env.getGestionnaireVagues().AugmenterVague();
-                    System.out.println("Vague terminée ! Prêt pour la vague : " + (env.getGestionnaireVagues().getNumVagueActu() + 1));
-
-                    if (boutonStart != null) {
-                        boutonStart.setDisable(false);
-                        boutonStart.setText("Lancer Vague " + (env.getGestionnaireVagues().getNumVagueActu() + 1));
+                    if (caseI >= 0 && caseI < grille.length && caseJ >= 0 && caseJ < grille[0].length) {
+                        m.appliquerRalentissement(grille[caseI][caseJ] == 6);
                     }
-                }
-            }
-            int[][] grille = env.getGrille();
-            int tailleTuile = env.getTailleTuile();
+                    m.deplacer();
 
-            // Compteurs dynamiques
-            labelArgent.setText(String.valueOf(env.getArgent()));
-            labelInfectes.setText(String.valueOf(env.getGensInfectes()));
-
-            changerCouleurCompteur(env.getGensInfectes());
-            // Parcourir tous les microbes actifs
-            for (int i = microbesActifs.size() - 1; i >= 0; i--){
-                Microbe m = microbesActifs.get(i);
-                // Convertir les pixels en indices de cases
-                int caseJ = (int) (m.getX() / tailleTuile);
-                int caseI = (int) (m.getY() / tailleTuile);
-
-                // Vérifier que les indices ne dépassent pas les dimensions de la grille de jeu
-                if (caseI >= 0 && caseI < grille.length && caseJ >= 0 && caseJ < grille[0].length) {
-                    // Ralentir le microbe si le microbe se trouve sur une case n°6 (acide ralentissant)
-                    m.appliquerRalentissement(grille[caseI][caseJ] == 6);
-                }
-                // Mettre à jour les coordonnées du microbe après déplacement
-                m.deplacer();
-
-                // Récupérer l'image correspondante au microbe
-                MicrobeVue imageVue = vuesMicrobes.get(m);
-                // Si l'image existe
-                if (imageVue != null) {
-                    // Mettre à jour les coordonnées de l'image
-                    imageVue.mettreAJourPosition();
-                }
-
-                // Si le microbe a atteint la sortie
-                if(m.getWaypointCible() == null){
-                    // Mettre à jour le compteur d'infections
-                    env.incrementerInfectes(m);
-                    // Retirer l'image si elle existe
+                    MicrobeVue imageVue = vuesMicrobes.get(m);
                     if (imageVue != null) {
-                        conteneurPrincipal.getChildren().remove(imageVue);
+                        imageVue.mettreAJourPosition();
                     }
-                    // Supprimer le microbe du dictionnaire ainsi que la liste des microbes actifs
-                    vuesMicrobes.remove(m);
-                    microbesActifs.remove(i);
-                }
-//              if (env.verifierVictoire()) {
+
+                    if (m.getWaypointCible() == null) {
+                        env.incrementerInfectes(m);
+                        if (imageVue != null) {
+                            conteneurPrincipal.getChildren().remove(imageVue);
+                        }
+                        vuesMicrobes.remove(m);
+                        microbesActifs.remove(i);
+                    }
+//                  if (env.verifierVictoire()) {
 //                  gameLoop.stop();
 //                  timeline.stop();
 //
 //                  afficherEcranVictoire();
 //                  return;
 //              }
-            }
+                }
             }
         };
     }
@@ -318,6 +311,11 @@ public class Controller implements Initializable {
             microbesActifs.clear();
             vuesMicrobes.clear();
 
+            for (ToursVue vueT : vuesTours.values()) {
+                conteneurPrincipal.getChildren().remove(vueT);
+            }
+            vuesTours.clear();
+
             conteneurPrincipal.getChildren().clear();
             conteneurPrincipal.getChildren().add(grilleJeu);
 
@@ -334,7 +332,7 @@ public class Controller implements Initializable {
                 boutonStart.setDisable(false);
                 boutonStart.setText("Lancer Vague 1");
             }
-
+            mettreAJourLabelVague();
             creerGameLoop();
         });
         ecranDefaite.afficherSur(conteneurPrincipal);
@@ -345,6 +343,11 @@ public class Controller implements Initializable {
             env = new Environnement();
             microbesActifs.clear();
             vuesMicrobes.clear();
+
+            for (ToursVue vueT : vuesTours.values()) {
+                conteneurPrincipal.getChildren().remove(vueT);
+            }
+            vuesTours.clear();
 
             env.getGestionnaireVagues().listeVagues.clear();
             env.getGestionnaireVagues().numVagueActu = 0;
@@ -369,5 +372,19 @@ public class Controller implements Initializable {
             creerGameLoop();
         });
         ecranVictoire.afficherSur(conteneurPrincipal);
+    }
+
+    public void ajouterTourSurTerrain(int caseX, int caseY, int portee, int degats, double vitesse, String nomImage) {
+        int tailleTuile = env.getTailleTuile();
+        double pixelX = caseX * tailleTuile;
+        double pixelY = caseY * tailleTuile;
+        universite_paris8.iut.aboudhan.saes2javafx.modele.Tours nouvelleTour =
+                new universite_paris8.iut.aboudhan.saes2javafx.modele.Tours(pixelX, pixelY, portee, degats, vitesse, nomImage);
+        ToursVue nouvelleTourVue = new ToursVue(nouvelleTour);
+        vuesTours.put(nouvelleTour, nouvelleTourVue);
+
+        conteneurPrincipal.getChildren().add(nouvelleTourVue);
+
+        System.out.println("Tour posée avec succès en case [" + caseX + ", " + caseY + "]");
     }
 }
