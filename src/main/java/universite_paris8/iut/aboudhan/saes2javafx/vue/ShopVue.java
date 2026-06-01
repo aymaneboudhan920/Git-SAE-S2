@@ -61,10 +61,10 @@ public class ShopVue {
         HBox containerTours = new HBox(15);
         containerTours.setAlignment(Pos.CENTER);
         containerTours.getChildren().addAll(
-                creerItem("Le Scientifique", "tour_scientifique.png", "100$"),
-                creerItem("Le Chimiste", "tour_chimiste.png", "200$"),
-                creerItem("Le Rayon X", "rayon_x.png", "250$"),
-                creerItem("Le Scanner", "scanner.png", "250$")
+                creerItem("Scientifique", "tour_scientifique.png", "100$"),
+                creerItem("Chimiste", "tour_chimiste.png", "200$"),
+                creerItem("Rayon_X", "rayon_x.png", "250$"),
+                creerItem("Scanner", "scanner.png", "250$")
         );
 
         // Section 2 : Les Potions
