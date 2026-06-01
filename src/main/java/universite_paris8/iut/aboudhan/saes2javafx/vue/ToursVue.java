@@ -5,15 +5,15 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import universite_paris8.iut.aboudhan.saes2javafx.modele.Tours;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.Tour;
 
-public class ToursVue extends Pane {
+public class TourVue extends Pane {
 
-    private Tours tour;
+    private Tour tour;
     private ImageView imageTour;
     private Circle cerclePortee;
 
-    public ToursVue(Tours tour) {
+    public TourVue(Tour tour) {
         this.tour = tour;
 
         this.imageTour = new ImageView(new Image(getClass().getResourceAsStream(tour.getNomImage())));
