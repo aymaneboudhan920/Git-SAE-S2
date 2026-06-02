@@ -13,14 +13,7 @@ public class MicrobeVue extends VBox {
     private ProgressBar barreDeVie;
 
     public MicrobeVue(Microbe m) {
-        super(4);
         this.microbe = m;
-
-        // Création de la barre de vie
-        this.barreDeVie = new ProgressBar(microbe.getRatioPV());
-        this.barreDeVie.setPrefWidth(25);
-        this.barreDeVie.setPrefHeight(3);
-        this.barreDeVie.getStyleClass().add("barre-vie-microbe");
 
         // Création de l'image du microbe
         ImageView imageMicrobe = new ImageView(new Image(getClass().getResourceAsStream(microbe.getNomImage())));
@@ -28,22 +21,32 @@ public class MicrobeVue extends VBox {
         imageMicrobe.setFitHeight(34);
         imageMicrobe.setPreserveRatio(true);
 
-        // Configuration de la VBox
+        // Création de la barre de vie
+        this.barreDeVie = new ProgressBar(microbe.getRatioPV());
+        this.barreDeVie.setPrefWidth(25);
+        this.barreDeVie.setPrefHeight(3);
+        this.barreDeVie.getStyleClass().add("barre-vie-microbe");
+
+        // On décale un peu la barre de vie vers le haut
+        this.barreDeVie.setTranslateY(-6);
+
+        // On met la VBox à la taille de l'image
         this.setAlignment(Pos.CENTER);
-        this.setMaxWidth(34);
         this.setMinWidth(34);
+        this.setMaxWidth(34);
+        this.setMinHeight(34);
+        this.setMaxHeight(34);
 
         mettreAJourPosition();
-
-        // Ajout de la barre de vie et de l'image directement dans nous-mêmes
         this.getChildren().addAll(this.barreDeVie, imageMicrobe);
     }
 
     public void mettreAJourPosition() {
+        // On donne à la VBox les mêmes coordonnées que le microbe
         this.setTranslateX(this.microbe.getX());
         this.setTranslateY(this.microbe.getY());
 
-        // met à jour la barre de vie graphiquement en temps réel
+        // Mise à jour la barre de vie en temps réel
         this.barreDeVie.setProgress(this.microbe.getRatioPV());
     }
 }
