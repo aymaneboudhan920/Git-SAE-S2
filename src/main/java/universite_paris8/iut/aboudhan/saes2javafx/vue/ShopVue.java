@@ -6,19 +6,20 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.effect.BoxBlur;
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 public class ShopVue {
 
     private StackPane rootShop;
     private VBox menuInterieur;
     private Runnable actionFermer;
-    private Runnable actionClicScientifique;
 
-    public ShopVue(Runnable actionFermer, Runnable actionClicScientifique) {
+    private Consumer<String> actionClicItem;
+
+    public ShopVue(Runnable actionFermer, Consumer<String> actionClicItem) {
         this.actionFermer = actionFermer;
-        this.actionClicScientifique = actionClicScientifique;
+        this.actionClicItem = actionClicItem;
         creerInterface();
     }
 
@@ -35,6 +36,9 @@ public class ShopVue {
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_RIGHT);
 
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
         Label titre = new Label("SHOP du LABORATOIRE");
         titre.getStyleClass().add("titre-shop");
 
@@ -43,54 +47,56 @@ public class ShopVue {
         btnFermer.setPrefSize(35, 35);
 
         btnFermer.setOnAction(e -> {
-            Pane parent = (Pane) rootShop.getParent();
-            if (parent != null) {
-                cacher(parent);
-            }
+            // On laisse le contrôleur gérer la fermeture via son Runnable
             actionFermer.run();
         });
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
         header.getChildren().addAll(titre, spacer, btnFermer);
 
-        // Les Tours
         VBox sectionTours = creerSection("TOURS DE DÉFENSE", "titre-categorie-tours");
         HBox containerTours = new HBox(15);
         containerTours.setAlignment(Pos.CENTER);
 
+        // Création des boutons d'items
         Button btnScientifique = creerItem("Scientifique", "tour_scientifique.png", "100$");
-        btnScientifique.setOnAction(e -> {
-            Pane parent = (Pane) rootShop.getParent();
-            if (parent != null) {
-                cacher(parent);
-            }
-            if (actionClicScientifique != null) {
-                actionClicScientifique.run();
-            } else {
-                System.out.println("Erreur : l'action clic scientifique est null dans ShopVue !");
-            }
-        });
+        btnScientifique.setOnAction(e -> declencherAchat("scientifique"));
 
-        containerTours.getChildren().addAll(
-                btnScientifique,
-                creerItem("Chimiste", "tour_chimiste.png", "200$"),
-                creerItem("Rayon_X", "rayon_x.png", "250$"),
-                creerItem("Scanner", "scanner.png", "250$")
-        );
+        Button btnChimiste = creerItem("Chimiste", "tour_chimiste.png", "200$");
+        btnChimiste.setOnAction(e -> declencherAchat("chimiste"));
 
-        // Les Potions
+        Button btnRayonX = creerItem("Rayon_X", "rayon_x.png", "250$");
+        btnRayonX.setOnAction(e -> declencherAchat("rayon_x"));
+
+        Button btnScanner = creerItem("Scanner", "scanner.png", "250$");
+        btnScanner.setOnAction(e -> declencherAchat("scanner"));
+
+        containerTours.getChildren().addAll(btnScientifique, btnChimiste, btnRayonX, btnScanner);
+
         VBox sectionPotions = creerSection("POTIONS", "titre-categorie-potions");
         HBox containerPotions = new HBox(15);
         containerPotions.setAlignment(Pos.CENTER);
-        containerPotions.getChildren().addAll(
-                creerItem("Rage", "potion_rage.png", "50$"),
-                creerItem("Soin", "potion_soin.png", "80$"),
-                creerItem("Gel", "potion_gel.png", "30$")
-        );
+
+        Button btnRage = creerItem("Rage", "potion_rage.png", "50$");
+        btnRage.setOnAction(e -> declencherAchat("potion_rage"));
+
+        Button btnSoin = creerItem("Soin", "potion_soin.png", "80$");
+        btnSoin.setOnAction(e -> declencherAchat("potion_soin"));
+
+        Button btnGel = creerItem("Gel", "potion_gel.png", "30$");
+        btnGel.setOnAction(e -> declencherAchat("potion_gel"));
+
+        containerPotions.getChildren().addAll(btnRage, btnSoin, btnGel);
 
         menuInterieur.getChildren().addAll(header, sectionTours, containerTours, sectionPotions, containerPotions);
         rootShop.getChildren().add(menuInterieur);
+    }
+
+    private void declencherAchat(String typeItem) {
+        if (actionClicItem != null) {
+            actionClicItem.accept(typeItem);
+        } else {
+            System.out.println("Erreur : l'action clic item est null dans ShopVue !");
+        }
     }
 
     private VBox creerSection(String nom, String nomClasseCSS) {
@@ -137,7 +143,7 @@ public class ShopVue {
 
     public void afficherSur(Pane parent) {
         if (!parent.getChildren().isEmpty()) {
-            parent.getChildren().get(0).setEffect(new BoxBlur(5, 5, 3));
+            parent.getChildren().get(0).setEffect(new javafx.scene.effect.BoxBlur(5, 5, 3));
         }
         if (!parent.getChildren().contains(rootShop)) {
             parent.getChildren().add(rootShop);
