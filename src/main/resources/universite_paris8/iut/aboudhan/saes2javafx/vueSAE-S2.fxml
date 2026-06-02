@@ -49,30 +49,30 @@
                </HBox.margin>
             </VBox>
             <GridPane>
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+               <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
                <children>
-                  <Button mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                  <Button fx:id="caseInventaire1" mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                      <graphic>
                         <VBox alignment="BOTTOM_CENTER">
                            <children>
-                              <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="imageInventaire1" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                                  <VBox.margin>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </VBox.margin>
                               </ImageView>
-                              <Label alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="LEVEL 1" textAlignment="CENTER" textFill="WHITE">
+                              <Label fx:id="labelInventaire1" alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="VIDE" textAlignment="CENTER" textFill="WHITE">
                                  <font>
                                     <Font name="Impact" size="15.0" />
                                  </font>
@@ -84,16 +84,17 @@
                         <Insets />
                      </GridPane.margin>
                   </Button>
-                  <Button layoutX="22.0" layoutY="17.0" mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+
+                  <Button fx:id="caseInventaire2" mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                      <graphic>
                         <VBox alignment="BOTTOM_CENTER">
                            <children>
-                              <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="imageInventaire2" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                                  <VBox.margin>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </VBox.margin>
                               </ImageView>
-                              <Label alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="LEVEL 1" textAlignment="CENTER" textFill="WHITE">
+                              <Label fx:id="labelInventaire2" alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="VIDE" textAlignment="CENTER" textFill="WHITE">
                                  <font>
                                     <Font name="Impact" size="15.0" />
                                  </font>
@@ -105,19 +106,17 @@
                         <Insets />
                      </GridPane.margin>
                   </Button>
-                  <Button layoutX="122.0" layoutY="17.0" mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+
+                  <Button fx:id="caseInventaire3" mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                      <graphic>
                         <VBox alignment="BOTTOM_CENTER">
                            <children>
-                              <ImageView fitHeight="50.0" fitWidth="52.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="imageInventaire3" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                                  <VBox.margin>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </VBox.margin>
-                                 <image>
-                                    <Image url="@vue/cadenas.png" />
-                                 </image>
                               </ImageView>
-                              <Label alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="UNLOCKED" textAlignment="CENTER" textFill="WHITE">
+                              <Label fx:id="labelInventaire3" alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="VIDE" textAlignment="CENTER" textFill="WHITE">
                                  <font>
                                     <Font name="Impact" size="15.0" />
                                  </font>
@@ -129,19 +128,17 @@
                         <Insets />
                      </GridPane.margin>
                   </Button>
-                  <Button mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+
+                  <Button fx:id="caseInventaire4" mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                      <graphic>
                         <VBox alignment="BOTTOM_CENTER">
                            <children>
-                              <ImageView fitHeight="50.0" fitWidth="44.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="imageInventaire4" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                                  <VBox.margin>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </VBox.margin>
-                                 <image>
-                                    <Image url="@vue/cadenas.png" />
-                                 </image>
                               </ImageView>
-                              <Label alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="UNLOCKED" textAlignment="CENTER" textFill="WHITE">
+                              <Label fx:id="labelInventaire4" alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="VIDE" textAlignment="CENTER" textFill="WHITE">
                                  <font>
                                     <Font name="Impact" size="15.0" />
                                  </font>
@@ -153,19 +150,17 @@
                         <Insets />
                      </GridPane.margin>
                   </Button>
-                  <Button mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+
+                  <Button fx:id="caseInventaire5" mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                      <graphic>
                         <VBox alignment="BOTTOM_CENTER">
                            <children>
-                              <ImageView fitHeight="50.0" fitWidth="44.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="imageInventaire5" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                                  <VBox.margin>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </VBox.margin>
-                                 <image>
-                                    <Image url="@vue/cadenas.png" />
-                                 </image>
                               </ImageView>
-                              <Label alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="UNLOCKED" textAlignment="CENTER" textFill="WHITE">
+                              <Label fx:id="labelInventaire5" alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="VIDE" textAlignment="CENTER" textFill="WHITE">
                                  <font>
                                     <Font name="Impact" size="15.0" />
                                  </font>
@@ -177,19 +172,17 @@
                         <Insets />
                      </GridPane.margin>
                   </Button>
-                  <Button mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+
+                  <Button fx:id="caseInventaire6" mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                      <graphic>
                         <VBox alignment="BOTTOM_CENTER">
                            <children>
-                              <ImageView fitHeight="50.0" fitWidth="44.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="imageInventaire6" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                                  <VBox.margin>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </VBox.margin>
-                                 <image>
-                                    <Image url="@vue/cadenas.png" />
-                                 </image>
                               </ImageView>
-                              <Label alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="UNLOCKED" textAlignment="CENTER" textFill="WHITE">
+                              <Label fx:id="labelInventaire6" alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="VIDE" textAlignment="CENTER" textFill="WHITE">
                                  <font>
                                     <Font name="Impact" size="15.0" />
                                  </font>
@@ -201,19 +194,17 @@
                         <Insets />
                      </GridPane.margin>
                   </Button>
-                  <Button mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+
+                  <Button fx:id="caseInventaire7" mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                      <graphic>
                         <VBox alignment="BOTTOM_CENTER">
                            <children>
-                              <ImageView fitHeight="50.0" fitWidth="44.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="imageInventaire7" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                                  <VBox.margin>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </VBox.margin>
-                                 <image>
-                                    <Image url="@vue/cadenas.png" />
-                                 </image>
                               </ImageView>
-                              <Label alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="UNLOCKED" textAlignment="CENTER" textFill="WHITE">
+                              <Label fx:id="labelInventaire7" alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="VIDE" textAlignment="CENTER" textFill="WHITE">
                                  <font>
                                     <Font name="Impact" size="15.0" />
                                  </font>
@@ -225,19 +216,17 @@
                         <Insets />
                      </GridPane.margin>
                   </Button>
-                  <Button mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="7" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+
+                  <Button fx:id="caseInventaire8" mnemonicParsing="false" styleClass="btn-inventaire-tour" GridPane.columnIndex="7" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                      <graphic>
                         <VBox alignment="BOTTOM_CENTER">
                            <children>
-                              <ImageView fitHeight="50.0" fitWidth="44.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="imageInventaire8" fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
                                  <VBox.margin>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </VBox.margin>
-                                 <image>
-                                    <Image url="@vue/cadenas.png" />
-                                 </image>
                               </ImageView>
-                              <Label alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="UNLOCKED" textAlignment="CENTER" textFill="WHITE">
+                              <Label fx:id="labelInventaire8" alignment="CENTER" contentDisplay="CENTER" styleClass="vague" text="VIDE" textAlignment="CENTER" textFill="WHITE">
                                  <font>
                                     <Font name="Impact" size="15.0" />
                                  </font>
@@ -263,14 +252,14 @@
                      </VBox.margin>
                   </Label>
                   <GridPane alignment="CENTER">
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
                      <children>
                         <ImageView fitHeight="50.0" fitWidth="44.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
                            <image>
@@ -329,13 +318,13 @@
                </font>
                <graphic>
                   <GridPane>
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
                      <children>
                         <ImageView fitHeight="40.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                            <image>
@@ -380,7 +369,7 @@
                   </GridPane>
                </graphic>
             </Button>
-            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="180.0" mnemonicParsing="false" onAction="#actionBoutonShop" styleClass="btn-shop">               
+            <Button alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="180.0" mnemonicParsing="false" onAction="#actionBoutonShop" styleClass="btn-shop">
                <VBox.margin>
                   <Insets bottom="40.0" />
                </VBox.margin>
@@ -408,14 +397,14 @@
                </graphic>
             </Button>
             <GridPane alignment="TOP_CENTER" prefHeight="150.0" prefWidth="150.0">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="70.0" minWidth="10.0" prefWidth="70.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="70.0" prefWidth="70.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints>
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="70.0" minWidth="10.0" prefWidth="70.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="70.0" prefWidth="70.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
                <children>
                   <Button mnemonicParsing="false" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
                      <graphic>
