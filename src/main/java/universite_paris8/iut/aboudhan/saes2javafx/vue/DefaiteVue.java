@@ -72,7 +72,7 @@ public class DefaiteVue {
         this.layoutDefaite.layoutXProperty().bind(conteneurPrincipal.widthProperty().subtract(layoutDefaite.widthProperty()).divide(2));
         this.layoutDefaite.layoutYProperty().bind(conteneurPrincipal.heightProperty().subtract(layoutDefaite.heightProperty()).divide(2));
 
-        // Animation des 2s de pause et du fondu de 1s)
+        // Animation des 2s de pause et du fondu de 1s
         PauseTransition pause = new PauseTransition(Duration.seconds(2));
         FadeTransition fondu = new FadeTransition(Duration.seconds(1), blocBoutons);
         fondu.setFromValue(0);
