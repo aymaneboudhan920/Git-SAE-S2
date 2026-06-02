@@ -55,6 +55,9 @@ public class Controller implements Initializable {
         creerTimeline();
         mettreAJourLabelVague();
 
+        labelArgent.setText(String.valueOf(env.getArgent()));
+        labelInfectes.setText(String.valueOf(env.getGensInfectes()));
+
         grilleJeu.setOnMouseClicked(event -> {
             if (!modePlacementTour) {
                 return;
@@ -168,22 +171,18 @@ public class Controller implements Initializable {
                     this.typeTourEnCoursAchat = "scientifique";
 
                     this.shopActuel = null;
-
-                    System.out.println("Mode placement activé : Cliquez sur une case du terrain !");
                 }
         );
         shopActuel.afficherSur(conteneurPrincipal);
     }
 
     private void mettreAJourLabelVague() {
-        int numeroActuel = env.getGestionnaireVagues().getNumVagueActu() + 1;
-        labelVague.setText("VAGUE " + numeroActuel);
+        int numActu =  env.getGestionnaireVagues().getNumVagueActu() + 1;
+        labelVague.setText("VAGUE " + numActu);
     }
 
     private void creerTimeline() {
         Vague vagueActuelle = env.getGestionnaireVagues().getVagueActuelle();
-
-        // Sécurité : Si le modèle n'a pas de vagues chargées, on ne fait rien
         if (vagueActuelle == null) {
             return;
         }
@@ -234,20 +233,37 @@ public class Controller implements Initializable {
                     // Distribution du bonus de fin de vague
                     env.ajouterArgent(vagueActuelle.getBonus());
 
+                    // Récupération du numéro de la vague qui vient de se terminer (Ex: Index 0 = Vague 1)
+                    int numVagueTerminee = env.getGestionnaireVagues().getNumVagueActu() + 1;
+
                     // Vérification de la victoire finale
                     if (env.getGestionnaireVagues().estDerniereVague()) {
-                        // Ajouter EcranVictoire ici
+                        afficherEcranVictoire();
                     } else {
-                        // On passe au numéro de vague suivant
-                        env.getGestionnaireVagues().AugmenterVague();
-                        System.out.println("Vague terminée ! Prêt pour la vague : " + (env.getGestionnaireVagues().getNumVagueActu() + 1));
-
+                        // Désactivation temporaire du bouton start pendant l'attente des 5 secondes
                         if (boutonStart != null) {
-                            boutonStart.setDisable(false);
-                            boutonStart.setText("Lancer Vague " + (env.getGestionnaireVagues().getNumVagueActu() + 1));
+                            boutonStart.setDisable(true);
                         }
+
+                        // Création et affichage de l'écran inter-vague modernisé
+                        VagueGagneeVue ecranInterVague = new VagueGagneeVue(conteneurPrincipal, grilleJeu, numVagueTerminee,
+                            () -> {
+                                // Passage à la vague suivante
+                                env.getGestionnaireVagues().AugmenterVague();
+                                mettreAJourLabelVague();
+
+                                // Réactivation du bouton start pour la nouvelle vague
+                                if (boutonStart != null) {
+                                    boutonStart.setDisable(false);
+                                }
+                            }
+                        );
+
+                        // Affichage immédiat de l'overlay sur toute la grille
+                        ecranInterVague.afficherSur(conteneurPrincipal);
                     }
                 }
+
                 int[][] grille = env.getGrille();
                 int tailleTuile = env.getTailleTuile();
 
@@ -291,13 +307,6 @@ public class Controller implements Initializable {
                         vuesMicrobes.remove(m);
                         microbesActifs.remove(i);
                     }
-                    //              if (env.verifierVictoire()) {
-                    //                  gameLoop.stop();
-                    //                  timeline.stop();
-                    //
-                    //                  afficherEcranVictoire();
-                    //                  return;
-                    //              }
                 }
             }
         };
@@ -333,7 +342,6 @@ public class Controller implements Initializable {
 
             if (boutonStart != null) {
                 boutonStart.setDisable(false);
-                boutonStart.setText("Lancer Vague 1");
             }
 
             creerGameLoop();
@@ -363,7 +371,6 @@ public class Controller implements Initializable {
 
             if (boutonStart != null) {
                 boutonStart.setDisable(false);
-                boutonStart.setText("Lancer Vague 1");
             }
 
             mettreAJourLabelVague();
@@ -371,7 +378,7 @@ public class Controller implements Initializable {
         });
         ecranVictoire.afficherSur(conteneurPrincipal);
     }
-    
+
     public void ajouterTourSurTerrain(int caseX, int caseY, int portee, int degats, double vitesse, String nomImage) {
         int tailleTuile = env.getTailleTuile();
         double pixelX = caseX * tailleTuile;
@@ -382,7 +389,5 @@ public class Controller implements Initializable {
         vuesTours.put(nouvelleTour, nouvelleTourVue);
 
         conteneurPrincipal.getChildren().add(nouvelleTourVue);
-
-        System.out.println("Tour posée avec succès en case [" + caseX + ", " + caseY + "]");
     }
 }
