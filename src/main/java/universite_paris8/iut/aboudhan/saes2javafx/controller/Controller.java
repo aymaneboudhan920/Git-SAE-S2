@@ -27,7 +27,46 @@ public class Controller implements Initializable {
     @FXML private Label labelVague;
     @FXML private Button boutonStart;
 
+    @FXML private Button caseInventaire1;
+    @FXML private ImageView imageInventaire1;
+    @FXML private Label labelInventaire1;
+
+    @FXML private Button caseInventaire2;
+    @FXML private ImageView imageInventaire2;
+    @FXML private Label labelInventaire2;
+
+    @FXML private Button caseInventaire3;
+    @FXML private ImageView imageInventaire3;
+    @FXML private Label labelInventaire3;
+
+    @FXML private Button caseInventaire4;
+    @FXML private ImageView imageInventaire4;
+    @FXML private Label labelInventaire4;
+
+    @FXML private Button caseInventaire5;
+    @FXML private ImageView imageInventaire5;
+    @FXML private Label labelInventaire5;
+
+    @FXML private Button caseInventaire6;
+    @FXML private ImageView imageInventaire6;
+    @FXML private Label labelInventaire6;
+
+    @FXML private Button caseInventaire7;
+    @FXML private ImageView imageInventaire7;
+    @FXML private Label labelInventaire7;
+
+    @FXML private Button caseInventaire8;
+    @FXML private ImageView imageInventaire8;
+    @FXML private Label labelInventaire8;
+
     private Environnement env = new Environnement();
+
+    private final List<Button> boutonsInventaire = new ArrayList<>();
+    private final List<ImageView> imagesInventaire = new ArrayList<>();
+    private final List<Label> labelsInventaire = new ArrayList<>();
+
+    private Inventaire inventaireModele;
+    private InventaireVue inventaireVue;
 
     private final List<Microbe> microbesActifs = new ArrayList<>();
     private final java.util.Map<Microbe, MicrobeVue> vuesMicrobes = new java.util.HashMap<>();
@@ -39,7 +78,8 @@ public class Controller implements Initializable {
     private boolean jeuDemarre = false;
     private ShopVue shopActuel = null;
     private boolean modePlacementTour = false;
-    private String typeTourEnCoursAchat = "";
+    private String tourAchetee = "";
+    private int indexInventaireActu = -1;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -58,39 +98,65 @@ public class Controller implements Initializable {
         labelArgent.setText(String.valueOf(env.getArgent()));
         labelInfectes.setText(String.valueOf(env.getGensInfectes()));
 
+        boutonsInventaire.addAll(Arrays.asList(
+                caseInventaire1, caseInventaire2, caseInventaire3, caseInventaire4,
+                caseInventaire5, caseInventaire6, caseInventaire7, caseInventaire8
+        ));
+
+        imagesInventaire.addAll(Arrays.asList(
+                imageInventaire1, imageInventaire2, imageInventaire3, imageInventaire4,
+                imageInventaire5, imageInventaire6, imageInventaire7, imageInventaire8
+        ));
+
+        labelsInventaire.addAll(Arrays.asList(
+                labelInventaire1, labelInventaire2, labelInventaire3, labelInventaire4,
+                labelInventaire5, labelInventaire6, labelInventaire7, labelInventaire8
+        ));
+
+        // Initialisation propre du modèle et de la vue d'inventaire
+        this.inventaireModele = new Inventaire(8);
+        this.inventaireVue = new InventaireVue(boutonsInventaire, imagesInventaire, labelsInventaire);
+
         grilleJeu.setOnMouseClicked(event -> {
-            if (!modePlacementTour) {
+            if (!modePlacementTour || tourAchetee.isEmpty()) {
                 return;
             }
 
             int tailleTuile = env.getTailleTuile();
-
             int caseX = (int) (event.getX() / tailleTuile);
             int caseY = (int) (event.getY() / tailleTuile);
-
             int[][] grille = env.getGrille();
 
             if (caseY >= 0 && caseY < grille.length && caseX >= 0 && caseX < grille[0].length) {
 
                 if (grille[caseY][caseX] == 0) {
 
-                    if (typeTourEnCoursAchat.equals("scientifique")) {
-                        int portee = 120;
-                        int degats = 15;
-                        double vitesse = 1.2;
-                        String image = "/universite_paris8/iut/aboudhan/saes2javafx/vue/tour_scientifique.png";
+                    boolean tourPosee = false;
 
-                        ajouterTourSurTerrain(caseX, caseY, portee, degats, vitesse, image);
+                    if (tourAchetee.equals("scientifique")) {
+                        ajouterTourSurTerrain(caseX, caseY, 120, 15, 1.2, "/universite_paris8/iut/aboudhan/saes2javafx/vue/tour_scientifique.png");
+                        tourPosee = true;
+                    } else if (tourAchetee.equals("chimiste")) {
+                        ajouterTourSurTerrain(caseX, caseY, 90, 25, 0.8, "/universite_paris8/iut/aboudhan/saes2javafx/vue/tour_chimiste.png");
+                        tourPosee = true;
+                    }
+
+                    if (tourPosee) {
 
                         grille[caseY][caseX] = 99;
+
+                        if (indexInventaireActu >= 0) {
+                            inventaireVue.desactiveBoutonTour(indexInventaireActu);
+                            inventaireModele.setTourCase(indexInventaireActu, null);
+                        }
+
                         modePlacementTour = false;
-                        typeTourEnCoursAchat = "";
+                        tourAchetee = "";
+                        indexInventaireActu = -1;
 
                         if (!jeuDemarre && boutonStart != null) {
                             boutonStart.setDisable(false);
                         }
-
-                        actionBoutonShop(null);
                     }
 
                 }
@@ -130,52 +196,68 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    private void actionBoutonShop(javafx.event.ActionEvent event) {
+    private void actionBoutonShop() {
         if (shopActuel != null) {
             shopActuel.cacher(conteneurPrincipal);
-
-            //On relance les moteurs UNIQUEMENT si le jeu a déjà été démarré par le bouton START
             if (jeuDemarre) {
                 gameLoop.start();
                 timeline.play();
             }
-
             shopActuel = null;
             return;
         }
 
-        // On met en pause uniquement si le jeu est en train de tourner
         if (jeuDemarre) {
             gameLoop.stop();
             timeline.pause();
         }
 
-        // On crée l'interface du shop
         shopActuel = new ShopVue(
-                () -> {
-                    // Ce code s'exécute si le joueur clique sur la croix "X"
-                    if (shopActuel != null) {
-                        shopActuel.cacher(conteneurPrincipal);
-
-                        // On ne relance que si le bouton START a déjà été cliqué au moins une fois
-                        if (jeuDemarre) {
-                            gameLoop.start();
-                            timeline.play();
-                        }
-
-                        shopActuel = null;
+            () -> {
+                if (shopActuel != null) {
+                    shopActuel.cacher(conteneurPrincipal);
+                    if (jeuDemarre) {
+                        gameLoop.start();
+                        timeline.play();
                     }
-                },
-                () -> {
-                    this.modePlacementTour = true;
-                    this.typeTourEnCoursAchat = "scientifique";
-
-                    this.shopActuel = null;
+                    shopActuel = null;
                 }
+            },
+            (typeItem) -> {
+                // Recherche de la première case vide
+                int caseLibre = inventaireModele.getPremiereCaseLibre();
+
+                if (caseLibre == -1) {
+                    System.out.println("Inventaire complet ! Posez des structures pour libérer de la place.");
+                } else {
+                    // Mise à jour du modèle et de la vue
+                    inventaireModele.setTourCase(caseLibre, typeItem);
+                    inventaireVue.installerTour(caseLibre, typeItem);
+
+                    // Capture de l'index pour notre expression Lambda
+                    final int indexActuel = caseLibre;
+
+                    // Configuration de l'action de clic sur le bouton fourni par la vue
+                    inventaireVue.getIndexInventaire(caseLibre).setOnAction(e -> {
+                        this.modePlacementTour = true;
+                        this.tourAchetee = typeItem;
+                        this.indexInventaireActu = indexActuel; // On enregistre quelle case va poser
+                    });
+                }
+
+                if (shopActuel != null) {
+                    shopActuel.cacher(conteneurPrincipal);
+                    if (jeuDemarre) {
+                        gameLoop.start();
+                        timeline.play();
+                    }
+                    shopActuel = null;
+                }
+            }
         );
+
         shopActuel.afficherSur(conteneurPrincipal);
     }
-
     private void mettreAJourLabelVague() {
         int numActu =  env.getGestionnaireVagues().getNumVagueActu() + 1;
         labelVague.setText("VAGUE " + numActu);
@@ -328,6 +410,11 @@ public class Controller implements Initializable {
             microbesActifs.clear();
             vuesMicrobes.clear();
 
+            for (TourVue vueT : vuesTours.values()) {
+                conteneurPrincipal.getChildren().remove(vueT);
+            }
+            vuesTours.clear();
+
             conteneurPrincipal.getChildren().clear();
             conteneurPrincipal.getChildren().add(grilleJeu);
 
@@ -354,6 +441,11 @@ public class Controller implements Initializable {
             env = new Environnement();
             microbesActifs.clear();
             vuesMicrobes.clear();
+
+            for (TourVue vueT : vuesTours.values()) {
+                conteneurPrincipal.getChildren().remove(vueT);
+            }
+            vuesTours.clear();
 
             env.getGestionnaireVagues().listeVagues.clear();
             env.getGestionnaireVagues().numVagueActu = 0;
@@ -383,8 +475,7 @@ public class Controller implements Initializable {
         int tailleTuile = env.getTailleTuile();
         double pixelX = caseX * tailleTuile;
         double pixelY = caseY * tailleTuile;
-        universite_paris8.iut.aboudhan.saes2javafx.modele.Tour nouvelleTour =
-                new universite_paris8.iut.aboudhan.saes2javafx.modele.Tour(pixelX, pixelY, portee, degats, vitesse, nomImage);
+        Tour nouvelleTour = new Tour(pixelX, pixelY, portee, degats, vitesse, nomImage);
         TourVue nouvelleTourVue = new TourVue(nouvelleTour);
         vuesTours.put(nouvelleTour, nouvelleTourVue);
 
