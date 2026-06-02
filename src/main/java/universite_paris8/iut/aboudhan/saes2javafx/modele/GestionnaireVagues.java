@@ -15,12 +15,10 @@ public class GestionnaireVagues {
     public void initialiserVagues(Environnement env) {
         String prefixe = "/universite_paris8/iut/aboudhan/saes2javafx/vue/";
 
-        // Vague 1
         Vague v1 = new Vague(3.0, 30);
         for (int i = 0; i < 14; i++) {
             int choixMicrobe = (int) (Math.random() * 2);
 
-            // On utilise un switch (ou des if) pour faire un "new" à chaque itération
             switch (choixMicrobe) {
                 case 0:
                     v1.getFileAttenteMicrobes().add(new Microbe(0.8, 30, 2, 1, prefixe + "rhinovirus.png", env.creerItineraireAleatoire()));
@@ -32,13 +30,12 @@ public class GestionnaireVagues {
         }
         this.listeVagues.add(v1);
 
-        // Vague 2
         Vague v2 = new Vague(3.0, 40);
         for (int i = 0; i < 12; i++) {
             int choixMicrobe = (int) (Math.random() * 3);
             switch (choixMicrobe) {
                 case 0:
-                    v1.getFileAttenteMicrobes().add(new Microbe(0.8, 30, 2, 1, prefixe + "rhinovirus.png", env.creerItineraireAleatoire()));
+                    v2.getFileAttenteMicrobes().add(new Microbe(0.8, 30, 2, 1, prefixe + "rhinovirus.png", env.creerItineraireAleatoire()));
                     break;
                 case 1:
                     v2.getFileAttenteMicrobes().add(new Microbe(1, 40, 3, 1, prefixe + "norovirus.png", env.creerItineraireAleatoire()));
@@ -50,13 +47,12 @@ public class GestionnaireVagues {
         }
         this.listeVagues.add(v2);
 
-        // Vague 3
         Vague v3 = new Vague(4.0, 50);
         for (int i = 0; i < 12; i++) {
             int choixMicrobe = (int) ((Math.random() * 3)+1);
             switch (choixMicrobe) {
                 case 1:
-                    v2.getFileAttenteMicrobes().add(new Microbe(1, 40, 3, 1, prefixe + "norovirus.png", env.creerItineraireAleatoire()));
+                    v3.getFileAttenteMicrobes().add(new Microbe(1, 40, 3, 1, prefixe + "norovirus.png", env.creerItineraireAleatoire()));
                     break;
                 case 2:
                     v3.getFileAttenteMicrobes().add(new Microbe(0.9, 60, 5, 2, prefixe + "streptocoque.png", env.creerItineraireAleatoire()));
@@ -73,7 +69,7 @@ public class GestionnaireVagues {
             int choixMicrobe = (int) ((Math.random() * 4)+1);
             switch (choixMicrobe) {
                 case 1:
-                    v2.getFileAttenteMicrobes().add(new Microbe(1, 40, 3, 1, prefixe + "norovirus.png", env.creerItineraireAleatoire()));
+                    v4.getFileAttenteMicrobes().add(new Microbe(1, 40, 3, 1, prefixe + "norovirus.png", env.creerItineraireAleatoire()));
                     break;
                 case 2:
                     v4.getFileAttenteMicrobes().add(new Microbe(0.9, 60, 5, 2, prefixe + "streptocoque.png", env.creerItineraireAleatoire()));
@@ -93,7 +89,7 @@ public class GestionnaireVagues {
             int choixMicrobe = (int) ((Math.random() * 5)+1);
             switch (choixMicrobe) {
                 case 1:
-                    v2.getFileAttenteMicrobes().add(new Microbe(1, 40, 3, 1, prefixe + "norovirus.png", env.creerItineraireAleatoire()));
+                    v5.getFileAttenteMicrobes().add(new Microbe(1, 40, 3, 1, prefixe + "norovirus.png", env.creerItineraireAleatoire()));
                     break;
                 case 2:
                     v5.getFileAttenteMicrobes().add(new Microbe(0.9, 60, 5, 2, prefixe + "streptocoque.png", env.creerItineraireAleatoire()));
