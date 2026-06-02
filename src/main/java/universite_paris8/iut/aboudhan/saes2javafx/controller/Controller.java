@@ -15,9 +15,7 @@ import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
 import javafx.util.Duration;
 
-import universite_paris8.iut.aboudhan.saes2javafx.modele.Microbe;
-import universite_paris8.iut.aboudhan.saes2javafx.modele.Environnement;
-import universite_paris8.iut.aboudhan.saes2javafx.modele.Vague;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.*;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.*;
 
 public class Controller implements Initializable {
