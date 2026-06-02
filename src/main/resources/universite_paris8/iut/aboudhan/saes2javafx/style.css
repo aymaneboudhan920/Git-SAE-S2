@@ -15,6 +15,7 @@
 .btn-shop {
     -fx-background-color: #ffa600;
     -fx-background-radius: 10px;
+    -fx-cursor: hand;
 
 }
 
@@ -41,6 +42,7 @@
 .btn-start {
     -fx-background-color: #27ae60;
     -fx-background-radius: 10;
+    -fx-cursor: hand;
 }
 
 .btn-inventaire-tour {
@@ -90,8 +92,8 @@
 }
 
 .calque-sombre {
-    -fx-background-color: rgb(0, 0, 0); 
-    -fx-opacity: 0.80; 
+    -fx-background-color: rgb(0, 0, 0);
+    -fx-opacity: 0.80;
 }
 
 .fond-flou-shop {
@@ -172,4 +174,23 @@
 .barre-vie-microbe .track {
     -fx-background-color: rgb(39, 214, 4);
     -fx-background-radius: 2px;
+}
+
+.titre-vague-gagnee {
+    -fx-font-family: 'Impact';
+    -fx-font-size: 80px;
+    -fx-fill: #3ae374;
+}
+
+.sous-titre-vague-gagnee {
+    -fx-font-family: 'Impact';
+    -fx-font-size: 22px;
+    -fx-fill: #ffffff;
+}
+
+.decompte-vague {
+    -fx-font-family: 'Impact';
+    -fx-font-size: 80px;
+    -fx-fill: #ffffff;
+    -fx-font-weight: bold;
 }
