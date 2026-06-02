@@ -18,8 +18,7 @@ public class Environnement {
         this.tailleTuile = 34;
         this.gestionnaireVagues = new GestionnaireVagues();
     }
-
-    // GETTERS
+    
     public int[][] getGrille() {
         return grille;
     }
@@ -41,16 +40,14 @@ public class Environnement {
     }
 
     public Waypoint creerItineraireAleatoire() {
-        int ligneEntree = -1, colonneEntree = -1; // Coordonnées de la case de départ
-        int ligneSortie = -1, colonneSortie = -1; // Coordonnées de la case d'arrivée
-        int ligneConduit4 = -1, colonneConduit4 = -1; // Coordonnées dee l'entrée du conduit ( conduit n°4 )
-        // Création d'une liste de tableaux d'entiers pour stocker les coordonnées des sorties de conduits ( conduit n°5 )
+        int ligneEntree = -1, colonneEntree = -1;
+        int ligneSortie = -1, colonneSortie = -1;
+        int ligneConduit4 = -1, colonneConduit4 = -1;
         List<int[]> conduits5 = new ArrayList<>();
 
-        // Parcours de la map
+        // Parcours de la map pour trouver les dalles spéciales
         for (int i = 0; i < grille.length; i++) {
             for (int j = 0; j < grille[i].length; j++) {
-                // Recherche des cases spéciales ( entrée, sortie, conduits d'aérations )
                 if (grille[i][j] == 2) {
                     ligneEntree = i;
                     colonneEntree = j;
@@ -63,51 +60,69 @@ public class Environnement {
                     ligneConduit4 = i;
                     colonneConduit4 = j;
                 }
-                // Si on trouve une sortie de conduit, on ajoute son couple à la liste
                 if (grille[i][j] == 5) {
                     conduits5.add(new int[]{i, j});
                 }
             }
         }
 
-        // Création du point de départ
+        // Création du point de départ initial
         Waypoint pointDepart = new Waypoint(colonneEntree * tailleTuile, ligneEntree * tailleTuile);
-        // Création d'une liste où on stockera dans l'ordre toutes les dalles par lesquelles les microbes passeront pour ensuite pouvoir reconstruire le chemin.
-        List<Waypoint> cheminComplet = new ArrayList<>();
 
-        // Tirage au sort du trajet en fonction du nombre de chemins
-        int nombreTotalDeChemins = 1 + conduits5.size();
-        int choixChemin = (int) (Math.random() * nombreTotalDeChemins);
+        // Liste qui va stocker tous les chemins qui fonctionnent
+        List<List<Waypoint>> cheminsValides = new ArrayList<>();
 
-        if (choixChemin == 0) {
-            // Chemin classique direct sans passer par les conduits
-            cheminComplet = calculerCheminEntrePoints(ligneEntree, colonneEntree, ligneSortie, colonneSortie);
-        } else {
-            // On calcule d'abord la première partie du chemin ( entrée -> conduit n°4 )
-            List<Waypoint> CheminVersConduit = calculerCheminEntrePoints(ligneEntree, colonneEntree, ligneConduit4, colonneConduit4);
-            cheminComplet.addAll(CheminVersConduit); // On ajoute cette première partie au chemin complet
-
-            // On Sélectionne ensuite la bouche de sortie
-            int[] conduitSelectionne = conduits5.get(choixChemin - 1);
-            int ligneConduit5 = conduitSelectionne[0];
-            int colonneConduit5 = conduitSelectionne[1];
-
-            // Insertion des coordonnées de la sortie de conduit selectionnée dans le chemin final
-            cheminComplet.add(new Waypoint(colonneConduit5 * tailleTuile, ligneConduit5 * tailleTuile));
-
-            // Calcul de l'autre partie du chemin ( conduit n°5 sélectionné -> sortie )
-            List<Waypoint> CheminDepuisConduit5 = calculerCheminEntrePoints(ligneConduit5, colonneConduit5, ligneSortie, colonneSortie);
-            cheminComplet.addAll(CheminDepuisConduit5); // On ajoute maintenant la 2ème partie
+        // Test du chemin sans conduit
+        List<Waypoint> cheminClassique = calculerCheminEntrePoints(ligneEntree, colonneEntree, ligneSortie, colonneSortie);
+        if (!cheminClassique.isEmpty()) {
+            cheminsValides.add(cheminClassique);
         }
 
-        // Chaînage de tous les Waypoints
+        // Test du chemin avec les conduits
+        List<Waypoint> cheminVersConduit4 = calculerCheminEntrePoints(ligneEntree, colonneEntree, ligneConduit4, colonneConduit4);
+
+        // Si l'accès au conduit 4 n'est pas bloqué, on teste chaque sortie possible (Dalle 5)
+        if (!cheminVersConduit4.isEmpty()) {
+            for (int[] conduitSelectionne : conduits5) {
+                int ligneConduit5 = conduitSelectionne[0];
+                int colonneConduit5 = conduitSelectionne[1];
+
+                // Calcul du trajet de la sortie du conduit (5) vers la sortie finale (3)
+                List<Waypoint> cheminDepuisConduit5 = calculerCheminEntrePoints(ligneConduit5, colonneConduit5, ligneSortie, colonneSortie);
+
+                // Si la seconde partie est valide, on assemble le chemin du conduit complet
+                if (!cheminDepuisConduit5.isEmpty()) {
+                    List<Waypoint> cheminConduitComplet = new ArrayList<>(cheminVersConduit4);
+
+                    // Ajout du point pivot (Bouche de sortie du conduit)
+                    cheminConduitComplet.add(new Waypoint(colonneConduit5 * tailleTuile, ligneConduit5 * tailleTuile));
+
+                    cheminConduitComplet.addAll(cheminDepuisConduit5);
+
+                    cheminsValides.add(cheminConduitComplet);
+                }
+            }
+        }
+
+        // Choix du chemin final parmi ceux qui fonctionnent
+        List<Waypoint> cheminFinal;
+
+        if (!cheminsValides.isEmpty()) {
+            // Choix aléatoire d'un chemin
+            int indexAleatoire = (int) (Math.random() * cheminsValides.size());
+            cheminFinal = cheminsValides.get(indexAleatoire);
+        } else {
+            // Si tout est bloqué, on renvoie une liste vide pour éviter de crash.
+            return pointDepart;
+        }
+
+        // Chaînage de tous les Waypoints sélectionnés
         Waypoint precedent = pointDepart;
-        for (Waypoint wp : cheminComplet) {
+        for (Waypoint wp : cheminFinal) {
             precedent.ajouterSuivant(wp);
             precedent = wp;
         }
 
-        // Retourne le point de départ
         return pointDepart;
     }
 
