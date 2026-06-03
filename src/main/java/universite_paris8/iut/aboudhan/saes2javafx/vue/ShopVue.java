@@ -6,6 +6,11 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.TourChimiste;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.TourRayonX;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.TourScanner;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.TourScientifique;
+
 import java.io.InputStream;
 import java.util.function.Consumer;
 
@@ -58,17 +63,17 @@ public class ShopVue {
         containerTours.setAlignment(Pos.CENTER);
 
         // Création des boutons d'items
-        Button btnScientifique = creerItem("Scientifique", "tour_scientifique.png", "100$");
+        Button btnScientifique = creerItem("Scientifique", "tour_scientifique.png", TourScientifique.prixAchat + "$");
         btnScientifique.setOnAction(e -> declencherAchat("scientifique"));
 
-        Button btnChimiste = creerItem("Chimiste", "tour_chimiste.png", "200$");
+        Button btnChimiste = creerItem("Chimiste", "tour_chimiste.png", TourChimiste.prixAchat + "$");
         btnChimiste.setOnAction(e -> declencherAchat("chimiste"));
 
-        Button btnRayonX = creerItem("Rayon_X", "rayon_x.png", "250$");
-        btnRayonX.setOnAction(e -> declencherAchat("rayon_x"));
-
-        Button btnScanner = creerItem("Scanner", "scanner.png", "250$");
+        Button btnScanner = creerItem("Scanner", "tour_scanner.png", TourScanner.prixAchat + "$");
         btnScanner.setOnAction(e -> declencherAchat("scanner"));
+
+        Button btnRayonX = creerItem("Rayon_X", "tour_rayon_x.png", TourRayonX.prixAchat + "$");
+        btnRayonX.setOnAction(e -> declencherAchat("rayon_x"));
 
         containerTours.getChildren().addAll(btnScientifique, btnChimiste, btnRayonX, btnScanner);
 
@@ -94,8 +99,6 @@ public class ShopVue {
     private void declencherAchat(String typeItem) {
         if (actionClicItem != null) {
             actionClicItem.accept(typeItem);
-        } else {
-            System.out.println("Erreur : l'action clic item est null dans ShopVue !");
         }
     }
 
@@ -114,24 +117,22 @@ public class ShopVue {
         String cheminImg = "/universite_paris8/iut/aboudhan/saes2javafx/vue/" + imgNom;
         InputStream stream = getClass().getResourceAsStream(cheminImg);
 
-        ImageView iv = new ImageView();
+        ImageView image = new ImageView();
         if (stream != null) {
-            iv.setImage(new Image(stream));
-        } else {
-            System.out.println("Image introuvable : " + cheminImg + " ! ");
+            image.setImage(new Image(stream));
         }
 
-        iv.setFitHeight(40);
-        iv.setFitWidth(40);
-        iv.setPreserveRatio(true);
+        image.setFitHeight(40);
+        image.setFitWidth(40);
+        image.setPreserveRatio(true);
 
-        Label lblNom = new Label(nom);
-        lblNom.getStyleClass().add("nom-item-shop");
+        Label labelNom = new Label(nom);
+        labelNom.getStyleClass().add("nom-item-shop");
 
-        Label lblPrix = new Label(prix);
-        lblPrix.getStyleClass().add("prix-item-shop");
+        Label labelPrix = new Label(prix);
+        labelPrix.getStyleClass().add("prix-item-shop");
 
-        boiteInterieure.getChildren().addAll(iv, lblNom, lblPrix);
+        boiteInterieure.getChildren().addAll(image, labelNom, labelPrix);
 
         Button boutonItem = new Button();
         boutonItem.setGraphic(boiteInterieure);
