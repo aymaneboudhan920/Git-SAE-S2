@@ -35,7 +35,7 @@ public class VictoireVue {
         Text titreVictoire = new Text("VICTOIRE");
         titreVictoire.getStyleClass().addAll("titre-fin", "titre-victoire");
 
-        Text sousTitre = new Text(" Vous avez réussi à empêcher la contamination du monde.");
+        Text sousTitre = new Text(" Vous avez réussi à empêcher la contamination de notre monde. MERCI !");
         sousTitre.getStyleClass().add("sous-titre-fin");
 
         String prefixe = "/universite_paris8/iut/aboudhan/saes2javafx/vue/";
