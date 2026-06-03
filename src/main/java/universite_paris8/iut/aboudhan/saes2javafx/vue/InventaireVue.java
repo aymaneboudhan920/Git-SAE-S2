@@ -45,13 +45,18 @@ public class InventaireVue {
 
     // Appelé quand la tour est posée sur le terrain : le bouton se grise mais l'image RESTE
     public void desactiveBoutonTour(int index) {
-        if (index >= 0 && index < boutons.size()) {
-            boutons.get(index).setDisable(true);
-        }
+        boutons.get(index).getStyleClass().add("tour-posee");
     }
 
     // Fournit le bouton au Controller pour y greffer dynamiquement le .setOnAction(...)
     public Button getIndexInventaire(int index) {
         return boutons.get(index);
+    }
+
+    public Button getBouton(int index) {
+        if (index >= 0 && index < boutons.size()) {
+            return boutons.get(index);
+        }
+        return null;
     }
 }
