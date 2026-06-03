@@ -39,8 +39,8 @@ public class Microbe {
 
             if(waypointCible != null){
                 double distanceSaut = Math.sqrt(
-                    Math.pow(waypointCible.getX() - this.x, 2) +
-                    Math.pow(waypointCible.getY() - this.y, 2)
+                        Math.pow(waypointCible.getX() - this.x, 2) +
+                                Math.pow(waypointCible.getY() - this.y, 2)
                 );
                 if (distanceSaut > 70) {
                     this.x = waypointCible.getX();
@@ -73,16 +73,16 @@ public class Microbe {
     public double getX() {
         return x;
     }
-
     public double getY() {
         return y;
     }
-
     public String getNomImage() {
         return this.nomImage;
     }
-
     public Waypoint getWaypointCible() {
         return this.waypointCible;
+    }
+    public double getVitesseActu() {
+        return vitesseActu;
     }
 }
