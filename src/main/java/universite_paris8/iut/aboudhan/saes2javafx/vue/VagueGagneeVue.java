@@ -35,10 +35,10 @@ public class VagueGagneeVue {
 
         // 2. Création des textes informatifs
         Text titre = new Text("VAGUE " + numeroVagueTerminee + " NETTOYÉE !");
-        titre.getStyleClass().add("titre-vague-gagnee");
+        titre.getStyleClass().addAll("titre-fin", "titre-vague-gagnee");
 
         Text sousTitre = new Text("Préparation pour la vague suivante...");
-        sousTitre.getStyleClass().add("sous-titre-vague-gagnee");
+        sousTitre.getStyleClass().add("sous-titre-fin");
 
         // Un seul objet Text qui va changer de valeur au cours du temps
         Text decompteText = new Text("");
