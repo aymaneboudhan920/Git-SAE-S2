@@ -1,7 +1,9 @@
 package universite_paris8.iut.aboudhan.saes2javafx.modele;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Environnement {
 
@@ -11,6 +13,9 @@ public class Environnement {
     private int argent = 100, gensInfectes = 0;
 
     private final GestionnaireVagues gestionnaireVagues;
+    private final List<Microbe> microbesActifs = new ArrayList<>();
+    private final Map<Tour, Integer> tourVersIndexInventaire = new HashMap<>();
+    private final Map<Tour, int[]> tourVersCaseGrille = new HashMap<>();
 
     public Environnement() {
         this.terrain = new Terrain();
@@ -18,25 +23,87 @@ public class Environnement {
         this.tailleTuile = 34;
         this.gestionnaireVagues = new GestionnaireVagues();
     }
-    
-    public int[][] getGrille() {
-        return grille;
+
+    public int getArgent() { return this.argent; }
+    public int getGensInfectes() { return this.gensInfectes; }
+    public int[][] getGrille() { return grille; }
+    public int getTailleTuile() { return tailleTuile; }
+    public GestionnaireVagues getGestionnaireVagues() { return gestionnaireVagues; }
+    public List<Microbe> getMicrobesActifs() { return microbesActifs; }
+    public Map<Tour, Integer> getTourVersIndexInventaire() { return tourVersIndexInventaire; }
+    public Map<Tour, int[]> getTourVersCaseGrille() { return tourVersCaseGrille; }
+
+    public void ajouterArgent(int montant) {
+        this.argent += montant;
     }
 
-    public int getTailleTuile() {
-        return tailleTuile;
+    public void reduireArgent(int montant) {
+        this.argent -= montant;
+        if (this.argent < 0) this.argent = 0; // Sécurité
     }
 
-    public int getArgent() {
-        return argent;
+    public void AugmenterNbInfectes(Microbe m) {
+        this.gensInfectes += m.infection;
     }
 
-    public int getGensInfectes() {
-        return gensInfectes;
+    public boolean verifierDefaite() {
+        return this.gensInfectes >= 70;
     }
 
-    public GestionnaireVagues getGestionnaireVagues() {
-        return gestionnaireVagues;
+    public void enregistrerTourPosee(Tour tour, int caseX, int caseY, int indexInventaire) {
+        grille[caseY][caseX] = 99;
+        tourVersCaseGrille.put(tour, new int[]{caseX, caseY});
+        tourVersIndexInventaire.put(tour, indexInventaire);
+    }
+
+    public void rappelerTour(Tour tour) {
+        int[] caseGrille = tourVersCaseGrille.remove(tour);
+        if (caseGrille != null) {
+            grille[caseGrille[1]][caseGrille[0]] = 0;
+        }
+        Integer indexInventaire = tourVersIndexInventaire.remove(tour);
+    }
+
+    public boolean unPasDeTemps() {
+        boolean unMicrobeEstPasse = false;
+
+        for (int i = microbesActifs.size() - 1; i >= 0; i--) {
+            Microbe m = microbesActifs.get(i);
+            int caseJ = (int) (m.getX() / tailleTuile);
+            int caseI = (int) (m.getY() / tailleTuile);
+
+            if (caseI >= 0 && caseI < grille.length && caseJ >= 0 && caseJ < grille[0].length) {
+                m.appliquerRalentissement(grille[caseI][caseJ] == 6);
+            }
+            m.deplacer();
+
+            if (m.getWaypointCible() == null) {
+                AugmenterNbInfectes(m);
+                microbesActifs.remove(i);
+                unMicrobeEstPasse = true;
+            }
+        }
+        return unMicrobeEstPasse;
+    }
+
+    public void reinitialiser() {
+        this.microbesActifs.clear();
+        this.tourVersIndexInventaire.clear();
+        this.tourVersCaseGrille.clear();
+        this.argent = 100;
+        this.gensInfectes = 0;
+
+        this.gestionnaireVagues.listeVagues.clear();
+        this.gestionnaireVagues.numVagueActu = 0;
+        this.gestionnaireVagues.initialiserVagues(this);
+
+        for (int i = 0; i < grille.length; i++) {
+            for (int j = 0; j < grille[i].length; j++) {
+                if (grille[i][j] == 99) {
+                    grille[i][j] = 0;
+                }
+            }
+        }
     }
 
     public Waypoint creerItineraireAleatoire() {
@@ -215,22 +282,5 @@ public class Environnement {
             }
         }
         return listeCheminWaypoints;
-    }
-
-    public void ajouterArgent(int montant) {
-        this.argent += montant;
-    }
-
-    public void reduireArgent(int montant) {
-        this.argent -= montant;
-        if (this.argent < 0) this.argent = 0; // Sécurité
-    }
-
-    public void incrementerInfectes(Microbe m) {
-        this.gensInfectes += m.infection;
-    }
-
-    public boolean verifierDefaite() {
-        return this.gensInfectes >= 70;
     }
 }
