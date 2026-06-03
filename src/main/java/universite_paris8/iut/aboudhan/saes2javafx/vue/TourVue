@@ -3,15 +3,12 @@ package universite_paris8.iut.aboudhan.saes2javafx.vue;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.Tour;
 
 public class TourVue extends Pane {
 
     private Tour tour;
     private ImageView imageTour;
-    private Circle cerclePortee;
 
     public TourVue(Tour tour) {
         this.tour = tour;
