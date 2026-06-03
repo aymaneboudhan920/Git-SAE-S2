@@ -20,17 +20,9 @@ public class TourVue extends Pane {
         this.imageTour.setFitWidth(34);
         this.imageTour.setFitHeight(34);
 
-        this.cerclePortee = new Circle(17, 17, tour.getPortee());
-        this.cerclePortee.setFill(Color.web("#3ae374", 0.15));
-        this.cerclePortee.setStroke(Color.web("#3ae374", 0.5));
-        this.cerclePortee.setVisible(false);
-
         this.setTranslateX(tour.getX());
         this.setTranslateY(tour.getY());
 
-        this.getChildren().addAll(cerclePortee, imageTour);
-
-        this.setOnMouseEntered(e -> cerclePortee.setVisible(true));
-        this.setOnMouseExited(e -> cerclePortee.setVisible(false));
+        this.getChildren().add(imageTour);
     }
 }
