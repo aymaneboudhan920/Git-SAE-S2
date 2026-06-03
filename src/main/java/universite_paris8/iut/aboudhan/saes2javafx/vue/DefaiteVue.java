@@ -33,10 +33,10 @@ public class DefaiteVue {
 
         // Création des textes
         Text titreDefaite = new Text("DÉFAITE");
-        titreDefaite.getStyleClass().add("titre-defaite");
+        titreDefaite.getStyleClass().addAll("titre-fin", "titre-defaite");
 
         Text sousTitre = new Text("+70 personnes ont été infectées ! L'épidémie est devenue incontrôlable...");
-        sousTitre.getStyleClass().add("sous-titre-defaite");
+        sousTitre.getStyleClass().add("sous-titre-fin");
 
         String prefixe = "/universite_paris8/iut/aboudhan/saes2javafx/vue/";
 
@@ -60,7 +60,7 @@ public class DefaiteVue {
         btnQuitter.getStyleClass().add("btn-fin");
         btnQuitter.setOnAction(e -> Platform.exit());
 
-        // Agencement des boutons 
+        // Agencement des boutons
         HBox blocBoutons = new HBox(30, btnRejouer, btnQuitter);
         blocBoutons.setAlignment(Pos.CENTER);
         blocBoutons.setOpacity(0); // Affiche pas les 2 premières secondes
