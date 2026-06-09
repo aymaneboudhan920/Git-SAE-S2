@@ -156,12 +156,18 @@ public class Controller implements Initializable {
     private void actionBoutonStart() {
         if (!jeuDemarre && boutonStart != null) {
             jeuDemarre = true;
+
             ScaleTransition st = new ScaleTransition(Duration.millis(100), boutonStart);
-            st.setToX(0.95); st.setToY(0.95);
-            st.setAutoReverse(true); st.setCycleCount(2);
+            st.setToX(0.95);
+            st.setToY(0.95);
+            st.setAutoReverse(true);
+            st.setCycleCount(2);
 
             st.setOnFinished(e -> {
                 boutonStart.setDisable(true);
+
+                configJeu.changerDeMusique("musique1.wav");
+
                 creerTimeline();
                 if (timeline != null) {
                     gameLoop.start();
@@ -171,6 +177,7 @@ public class Controller implements Initializable {
                     boutonStart.setDisable(false);
                 }
             });
+
             st.play();
         }
     }
@@ -384,11 +391,77 @@ public class Controller implements Initializable {
             boutonsInventaire.get(i).getStyleClass().remove("case-inventaire-selectionnee");
         }
 
+        if (configJeu != null) {
+            configJeu.changerDeMusique("musique1.wav");
+        }
+
         // Reset du gestionnaire de clics
         gestionnaireTours.reinitialiser();
 
         // Rafraîchissement global
         updateCompteurs();
         creerGameLoop();
+    }
+
+    @FXML
+    private void actionBoutonInfo() {
+        if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
+
+        vueInfoActive = new InfoVue(
+                configJeu.getTexteTutorielCourant(),
+                configJeu.estPremierePage(),
+                configJeu.estDernierePage(),
+                () -> {
+                    configJeu.pagePrecedente();
+                    vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
+                },
+                () -> {
+                    configJeu.pageSuivante();
+                    vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
+                },
+                () -> {
+                    if (vueInfoActive != null) {
+                        vueInfoActive.cacher(conteneurPrincipal);
+                        configJeu.reinitialiserTutoriel();
+                        vueInfoActive = null;
+                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                    }
+                }
+        );
+        vueInfoActive.afficherSur(conteneurPrincipal);
+    }
+
+    @FXML
+    private void actionBoutonTuto() {
+        if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
+
+        vueTutorielActive = new TutorielVue(() -> {
+            if (vueTutorielActive != null) {
+                vueTutorielActive.cacher(conteneurPrincipal);
+                vueTutorielActive = null;
+                if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+            }
+        });
+        vueTutorielActive.afficherSur(conteneurPrincipal);
+    }
+
+    @FXML
+    private void actionBoutonParametres() {
+        if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
+
+        vueParametresActive = new ParametreVue(
+                configJeu.getVolumeMusique(),
+                configJeu.getVolumeBruitages(),
+                nouveauVolMusique -> configJeu.setVolumeMusique(nouveauVolMusique),
+                nouveauVolBruit -> configJeu.setVolumeBruitages(nouveauVolBruit),
+                () -> {
+                    if (vueParametresActive != null) {
+                        vueParametresActive.cacher(conteneurPrincipal);
+                        vueParametresActive = null;
+                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                    }
+                }
+        );
+        vueParametresActive.afficherSur(conteneurPrincipal);
     }
 }
