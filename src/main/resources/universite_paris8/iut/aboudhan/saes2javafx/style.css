@@ -132,6 +132,11 @@
     -fx-background-color: #c0392b;
 }
 
+.btn-fermer-shop:disabled {
+    -fx-background-color: #7f8c8d;
+    -fx-text-fill: #bdc3c7;
+}
+
 .titre-categorie-tours {
     -fx-text-fill: #3ae374;
     -fx-font-weight: bold;
@@ -178,7 +183,14 @@
 }
 
 .barre-vie-microbe .track {
+    -fx-background-color: #e74c3c;
+    -fx-background-insets: 0;
+    -fx-background-radius: 2px;
+}
+
+.barre-vie-microbe .bar {
     -fx-background-color: rgb(39, 214, 4);
+    -fx-background-insets: 0;
     -fx-background-radius: 2px;
 }
 
@@ -216,27 +228,6 @@
     -fx-cursor: hand;
 }
 
-/* Styles généraux des fenêtres pop-up (Paramètres, Tuto, Info) */
-.fond-flou-shop {
-    -fx-background-color: rgba(0, 0, 0, 0.6); /* Fond sombre transparent */
-}
-
-.fenetre-shop {
-    -fx-background-color: #2c3e50;
-    -fx-border-color: #bdc3c7;
-    -fx-border-width: 2px;
-    -fx-border-radius: 10px;
-    -fx-background-radius: 10px;
-    -fx-padding: 20px;
-}
-
-.titre-shop {
-    -fx-text-fill: #e74c3c;
-    -fx-font-weight: bold;
-    -fx-font-size: 20px;
-}
-
-/* Labels spécifiques dans les paramètres et les guides */
 .label-popup {
     -fx-text-fill: white;
     -fx-font-weight: bold;
@@ -252,21 +243,4 @@
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-wrap-text: true;
-}
-
-/* Boutons */
-.btn-fermer-shop {
-    -fx-background-color: #e74c3c;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-cursor: hand;
-}
-
-.btn-fermer-shop:hover {
-    -fx-background-color: #c0392b;
-}
-
-.btn-fermer-shop:disabled {
-    -fx-background-color: #7f8c8d;
-    -fx-text-fill: #bdc3c7;
 }
