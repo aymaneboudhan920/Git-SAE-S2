@@ -27,7 +27,6 @@ public class Controller implements Initializable {
     @FXML
     public Button boutonStart;
 
-    // AJOUT : Les boutons du menu pour pouvoir les désactiver (Pense à mettre les mêmes fx:id dans ton FXML)
     @FXML private Button boutonShop;
     @FXML private Button boutonTuto;
     @FXML private Button boutonParametres;
@@ -59,7 +58,6 @@ public class Controller implements Initializable {
 
     private GestionnaireTours gestionnaireTours;
 
-    // ATTRIBUTS DE CONFIGURATION & AUDIO
     private Configuration configJeu;
     private ParametreVue vueParametresActive = null;
     private TutorielVue vueTutorielActive = null;
@@ -72,21 +70,28 @@ public class Controller implements Initializable {
         TerrainVue terrainVue = new TerrainVue(env.getGrille(), env.getTailleTuile());
         terrainVue.dessinerTerrain(grilleJeu);
 
+        // Préparer les vagues du jeu
         env.getGestionnaireVagues().initialiserVagues(env);
-
+        
+        // Mise à jour des compteurs et du numéro de vague
         updateCompteurs();
         mettreAJourLabelVague();
+
+        // Création de la loop et de la timeline
         creerGameLoop();
         creerTimeline();
 
+        // On rassemble les éléments de l'inventaire individuellement dans des listes
         boutonsInventaire.addAll(Arrays.asList(caseInventaire1, caseInventaire2, caseInventaire3, caseInventaire4, caseInventaire5, caseInventaire6, caseInventaire7, caseInventaire8));
         imagesInventaire.addAll(Arrays.asList(imageInventaire1, imageInventaire2, imageInventaire3, imageInventaire4, imageInventaire5, imageInventaire6, imageInventaire7, imageInventaire8));
         labelsInventaire.addAll(Arrays.asList(labelInventaire1, labelInventaire2, labelInventaire3, labelInventaire4, labelInventaire5, labelInventaire6, labelInventaire7, labelInventaire8));
 
+        // Création des structures d'inventaire et du gestionnaire de tours
         this.inventaireModele = new Inventaire(8);
         this.inventaireVue = new InventaireVue(boutonsInventaire, imagesInventaire, labelsInventaire);
         this.gestionnaireTours = new GestionnaireTours(this.env);
 
+        // Configuration des boutons de l'inventaire
         for (int i = 0; i < boutonsInventaire.size(); i++) {
             final int indexActuel = i;
             Button btn = boutonsInventaire.get(i);
@@ -98,8 +103,22 @@ public class Controller implements Initializable {
                 boolean tourRappelee = gestionnaireTours.gererClicInventaire(indexActuel, typeTour);
 
                 if (tourRappelee) {
+                    vuesTours.entrySet().removeIf(association -> {
+                        // On regarde dans le modèle si cette tour correspond à notre index d'inventaire
+                        Integer indexModele = env.getTourVersIndexInventaire().get(association.getKey());
+                        if (indexModele != null && indexModele == indexActuel) {
+                            // On enlève l'image de l'écran
+                            conteneurPrincipal.getChildren().remove(association.getValue());
+                            return true; // Supprime l'élément de la map vuesTours
+                        }
+                        return false;
+                    });
+
+                    // Remise à zéro visuelle du bouton pour qu'il soit à nouveau disponible au placement
                     btn.getStyleClass().remove("case-tour-posee");
-                    btn.setDisable(false);
+                    btn.getStyleClass().remove("case-inventaire-selectionnee");
+                    btn.setDisable(false); // Reste activé pour être replacé plus tard !
+
                 } else if (gestionnaireTours.isModePlacementTour()) {
                     for (Button b : boutonsInventaire)
                         b.getStyleClass().remove("case-inventaire-selectionnee");
@@ -107,7 +126,8 @@ public class Controller implements Initializable {
                 }
             });
         }
-
+        
+        // Si on clique n'importe où sur l'écran, le gestionnaire regarde si on veut poser une tour
         conteneurPrincipal.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.SECONDARY) {
                 gestionnaireTours.annulerPlacement();
@@ -118,7 +138,8 @@ public class Controller implements Initializable {
 
             double xSurGrille = event.getX() - grilleJeu.getLayoutX();
             double ySurGrille = event.getY() - grilleJeu.getLayoutY();
-
+            
+            // On demande au modèle s'il crée une tour suite à ce clic
             int indexBouton = gestionnaireTours.getIndexInventaireActu();
             Tour nouvelleTour = gestionnaireTours.gererClicTerrain(xSurGrille, ySurGrille);
 
@@ -127,26 +148,27 @@ public class Controller implements Initializable {
                 int caseX = (int) (xSurGrille / tailleTuile);
                 int caseY = (int) (ySurGrille / tailleTuile);
 
-                nouvelleTour.setX(grilleJeu.getLayoutX() + (caseX * tailleTuile));
-                nouvelleTour.setY(grilleJeu.getLayoutY() + (caseY * tailleTuile));
+                double pixelX = grilleJeu.getLayoutX() + (caseX * tailleTuile);
+                double pixelY = grilleJeu.getLayoutY() + (caseY * tailleTuile);
 
-                TourVue tourVue = new TourVue(nouvelleTour);
+                nouvelleTour.setX(pixelX);
+                nouvelleTour.setY(pixelY);
+
+                TourVue tourVue = new TourVue(nouvelleTour.getNomImage(), pixelX, pixelY);
                 vuesTours.put(nouvelleTour, tourVue);
                 conteneurPrincipal.getChildren().add(tourVue);
 
-                boutonsInventaire.get(indexBouton).getStyleClass().remove("case-inventaire-selectionnee");
-                inventaireVue.desactiveBoutonTour(indexBouton);
+                Button caseInventaire = boutonsInventaire.get(indexBouton);
+                caseInventaire.getStyleClass().remove("case-inventaire-selectionnee");
+                caseInventaire.getStyleClass().add("case-tour-posee");
+                caseInventaire.setDisable(false);
 
                 if (!jeuDemarre && boutonStart != null)
                     boutonStart.setDisable(false);
             }
         });
     }
-
-    /**
-     * MÉTHODE DE VERROUILLAGE CENTRALISÉE
-     * Désactive ou réactive l'intégralité des contrôles du jeu en tâche de fond.
-     */
+    
     private void verrouillerInterface(boolean verrouiller) {
         if (boutonStart != null) boutonStart.setDisable(verrouiller || jeuDemarre);
         if (boutonShop != null) boutonShop.setDisable(verrouiller);
@@ -167,9 +189,11 @@ public class Controller implements Initializable {
     }
 
     public void updateCompteurs() {
+        // Mise à jour du nombre d'infections / d'argent
         labelArgent.setText(String.valueOf(env.getArgent()));
         labelInfectes.setText(String.valueOf(env.getGensInfectes()));
 
+        // Change la couleur du label d'infections en fonction de son nombre
         int infectes = env.getGensInfectes();
         labelInfectes.getStyleClass().removeAll("compteur-danger-faible", "compteur-danger-fort", "compteur-defaite");
         if (infectes >= 20 && infectes < 50) labelInfectes.getStyleClass().add("compteur-danger-faible");
@@ -211,59 +235,72 @@ public class Controller implements Initializable {
 
     @FXML
     private void actionBoutonShop() {
-        if (shopActuel != null) return; // Sécurité anti-doublon
+        if (shopActuel != null) {
+            shopActuel.cacher(conteneurPrincipal);
+            if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+            shopActuel = null;
+            return;
+        }
 
         if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
         verrouillerInterface(true); // Verrouille tout derrière
 
         shopActuel = new ShopVue(
-                () -> { // Callback fermeture
+            () -> { 
+                if (shopActuel != null) {
+                    shopActuel.cacher(conteneurPrincipal);
+                    shopActuel = null;
+                    verrouillerInterface(false); // Libère l'interface
+                    if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                }
+            },
+            (typeItem) -> { 
+                if (typeItem.equals("potion_soin") || typeItem.equals("potion_rage") || typeItem.equals("potion_gel")) {
                     if (shopActuel != null) {
                         shopActuel.cacher(conteneurPrincipal);
-                        shopActuel = null;
-                        verrouillerInterface(false); // Libère l'interface
-                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
-                    }
-                },
-                (typeItem) -> { // Callback achat
-                    if (typeItem.equals("potion_soin") || typeItem.equals("potion_rage") || typeItem.equals("potion_gel")) {
-                        if (shopActuel != null) {
-                            shopActuel.cacher(conteneurPrincipal);
-                            shopActuel = null;
-                            verrouillerInterface(false);
-                            if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                        if (jeuDemarre) {
+                            gameLoop.start();
+                            timeline.play();
                         }
-                        return;
-                    }
-
-                    int prix = switch (typeItem) {
-                        case "scientifique" -> TourScientifique.prixAchat;
-                        case "chimiste" -> TourChimiste.prixAchat;
-                        case "scanner" -> TourScanner.prixAchat;
-                        case "rayon_x" -> TourRayonX.prixAchat;
-                        default -> 0;
-                    };
-
-                    int caseLibre = inventaireModele.getPremiereCaseLibre();
-                    if (env.getArgent() >= prix && caseLibre != -1) {
-                        env.reduireArgent(prix);
-                        updateCompteurs();
-                        inventaireModele.setTourCase(caseLibre, typeItem);
-                        inventaireVue.installerTour(caseLibre, typeItem);
-                    }
-
-                    if (shopActuel != null) {
-                        shopActuel.cacher(conteneurPrincipal);
                         shopActuel = null;
                         verrouillerInterface(false);
-                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
                     }
+                    return;
                 }
+
+                int prix = switch (typeItem) {
+                    case "scientifique" -> TourScientifique.prixAchat;
+                    case "chimiste" -> TourChimiste.prixAchat;
+                    case "scanner" -> TourScanner.prixAchat;
+                    case "rayon_x" -> TourRayonX.prixAchat;
+                    default -> 0;
+                };
+
+                int caseLibre = inventaireModele.getPremiereCaseLibre();
+                if (env.getArgent() >= prix && caseLibre != -1) {
+                    env.reduireArgent(prix);
+                    updateCompteurs();
+                    inventaireModele.setTourCase(caseLibre, typeItem);
+                    inventaireVue.installerTour(caseLibre, typeItem);
+                }
+
+                if (shopActuel != null) {
+                    shopActuel.cacher(conteneurPrincipal);
+                    shopActuel = null;
+                    verrouillerInterface(false);
+                    if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                }
+            },
+            TourScientifique.prixAchat,
+            TourChimiste.prixAchat,
+            TourScanner.prixAchat,
+            TourRayonX.prixAchat
         );
         shopActuel.afficherSur(conteneurPrincipal);
     }
 
     private void mettreAJourLabelVague() {
+        // Affichage du label de la vague après mise à jour
         int numActu = env.getGestionnaireVagues().getNumVagueActu() + 1;
         labelVague.setText("VAGUE " + numActu);
     }
@@ -275,71 +312,119 @@ public class Controller implements Initializable {
         timeline = new Timeline(
                 new KeyFrame(Duration.seconds(vagueActuelle.getTempsIntervalle()), event -> {
                     List<Microbe> fileAttente = vagueActuelle.getFileAttenteMicrobes();
-
+                    
+                    // Faire entrer le prochain microbe dans le jeu si il en reste encore
                     if (!fileAttente.isEmpty()) {
                         Microbe prochainMicrobe = fileAttente.remove(0);
                         env.getMicrobesActifs().add(prochainMicrobe);
 
-                        MicrobeVue vue = new MicrobeVue(prochainMicrobe);
+                        // Crée son image l'associe à son microbe puis l'affiche sur le jeu
+                        MicrobeVue vue = new MicrobeVue(
+                            prochainMicrobe.getNomImage(),
+                            prochainMicrobe.getX(),
+                            prochainMicrobe.getY(),
+                            prochainMicrobe.getRatioPV()
+                        );
                         vuesMicrobes.put(prochainMicrobe, vue);
                         conteneurPrincipal.getChildren().add(vue);
                     } else {
-                        timeline.stop();
+                        timeline.stop(); // Sinon on arrête de générer des microbes
                     }
                 })
         );
-        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.setCycleCount(Animation.INDEFINITE); // Répéter en boucle tant qu'on l'a pas arrêter
     }
 
     private void creerGameLoop() {
         gameLoop = new AnimationTimer() {
             @Override
             public void handle(long now) {
+                // Condition de défaite
                 if (env.verifierDefaite()) {
-                    gameLoop.stop();
+                    gameLoop.stop(); // Arrêt du jeu
                     if (timeline != null) timeline.stop();
+                    // Change la couleur du compteur d'infections en rouge et affiche l'écran de défaite
                     updateCompteurs();
                     afficherEcranDefaite();
                     return;
                 }
 
+                // Condition de victoire de la vague
                 Vague vagueActuelle = env.getGestionnaireVagues().getVagueActuelle();
                 if (vagueActuelle != null && vagueActuelle.getFileAttenteMicrobes().isEmpty()
                         && env.getMicrobesActifs().isEmpty() && jeuDemarre) {
                     jeuDemarre = false;
                     gameLoop.stop();
 
+                    // Donner le bonus d'argent de survie de fin de vague
                     env.ajouterArgent(vagueActuelle.getBonus());
                     updateCompteurs();
 
                     int numVagueTerminee = env.getGestionnaireVagues().getNumVagueActu() + 1;
 
+                    // Affichage de l'écran de victoire si c'était la dérnière vague (victoire finale)
                     if (env.getGestionnaireVagues().estDerniereVague()) {
                         afficherEcranVictoire();
                     } else {
                         if (boutonStart != null) boutonStart.setDisable(true);
+                        // Affichage de l'écran de victoire entre 2 vagues
                         VagueGagneeVue ecranInterVague = new VagueGagneeVue(conteneurPrincipal, grilleJeu, numVagueTerminee,
                                 () -> {
-                                    env.getGestionnaireVagues().AugmenterVague();
+                                    env.getGestionnaireVagues().AugmenterVague(); // Passe à la vague suivante
                                     mettreAJourLabelVague();
-                                    if (boutonStart != null) boutonStart.setDisable(false);
+                                    if (boutonStart != null) boutonStart.setDisable(false); // Ractivation du bouton start
                                 });
                         ecranInterVague.afficherSur(conteneurPrincipal);
                     }
                 }
 
+                // Si un microbe est sorti, on met à jour les compteurs
                 boolean ennemiSorti = env.updateMicrobes();
                 if (ennemiSorti) {
                     updateCompteurs();
                 }
 
+                double tps = 0.012;
+
+                // On parcourt toutes les tours présentes dans le modèle de l'environnement
+                List<Tour> toursEnJeu = new ArrayList<>(vuesTours.keySet());
+
+                for (int i = 0; i < toursEnJeu.size(); i++) {
+                    Tour tour = toursEnJeu.get(i);
+                    tour.mettreAJourRecharge(tps);
+                    tour.attaquer(env.getMicrobesActifs());
+                }
+
+                boolean unMicrobeEstMort = false;
+
+                // On regarde tous les microbes actifs avant de les nettoyer
+                for (int i = 0; i < env.getMicrobesActifs().size(); i++) {
+                    Microbe m = env.getMicrobesActifs().get(i);
+
+                    if (m.estMort()) {
+                        // Le joueur gagne la récompense spécifique de ce type de microbe !
+                        env.ajouterArgent(m.getRecompense());
+                        unMicrobeEstMort = true;
+                    }
+                }
+
+                // Si au moins un microbe est mort, on rafraîchit immédiatement l'affichage de l'argent
+                if (unMicrobeEstMort) {
+                    updateCompteurs(); // Appelle ta méthode qui met à jour le labelArgent
+                }
+
+                env.getMicrobesActifs().removeIf(m -> m.estMort());
+
                 List<Microbe> copiesActifs = new ArrayList<>(env.getMicrobesActifs());
                 for (Microbe m : copiesActifs) {
                     MicrobeVue imageVue = vuesMicrobes.get(m);
-                    if (imageVue != null) imageVue.mettreAJourPosition();
+                    if (imageVue != null)                       
+                        imageVue.mettreAJour(m.getX(), m.getY(), m.getRatioPV());
+
                 }
 
                 vuesMicrobes.keySet().removeIf(m -> {
+                    // On supprime l'image si le microbe n'est plus présent sur le terrain OU s'il est mort
                     if (!env.getMicrobesActifs().contains(m)) {
                         MicrobeVue imageVue = vuesMicrobes.get(m);
                         if (imageVue != null) conteneurPrincipal.getChildren().remove(imageVue);
@@ -372,6 +457,8 @@ public class Controller implements Initializable {
         for (MicrobeVue vueM : vuesMicrobes.values()) {
             conteneurPrincipal.getChildren().remove(vueM);
         }
+
+        // Nettoyage des listes de vues
         vuesMicrobes.clear();
 
         for (TourVue vueT : vuesTours.values()) {
@@ -379,13 +466,20 @@ public class Controller implements Initializable {
         }
         vuesTours.clear();
 
+        // Reset du conteneur de jeu
+        conteneurPrincipal.getChildren().clear();
+        conteneurPrincipal.getChildren().add(grilleJeu);
+
+        // Redessiner le terrain de base
         TerrainVue terrainVue = new TerrainVue(env.getGrille(), env.getTailleTuile());
         terrainVue.dessinerTerrain(grilleJeu);
 
+        // Reset des variables de contrôle d'affichage
         jeuDemarre = false;
+        boutonStart.setDisable(false);
         verrouillerInterface(false); // S'assure que rien ne reste bloqué au reboot
 
-        // Reset complet de l'inventaire physique
+        // Reset complet de l'inventaire
         for (int i = 0; i < boutonsInventaire.size(); i++) {
             inventaireModele.setTourCase(i, null);
             imagesInventaire.get(i).setImage(null);
@@ -398,7 +492,10 @@ public class Controller implements Initializable {
             configJeu.changerDeMusique("musique3.wav");
         }
 
+        // Reset du gestionnaire de clics
         gestionnaireTours.reinitialiser();
+
+        // Rafraîchissement global
         updateCompteurs();
         creerGameLoop();
     }
