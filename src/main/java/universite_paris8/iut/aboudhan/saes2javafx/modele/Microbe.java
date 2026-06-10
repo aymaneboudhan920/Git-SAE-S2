@@ -70,6 +70,9 @@ public class Microbe {
         return pv <= 0;
     }
 
+    public int getRecompense() {
+        return recompense;
+    }
     public double getX() {
         return x;
     }
