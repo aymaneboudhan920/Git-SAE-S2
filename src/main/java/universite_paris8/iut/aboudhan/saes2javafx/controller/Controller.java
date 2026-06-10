@@ -216,7 +216,7 @@ public class Controller implements Initializable {
                 boutonStart.setDisable(true);
 
                 if (configJeu != null) {
-                    configJeu.changerDeMusique("musique1.wav");
+                    configJeu.changerDeMusique("musiqueJeu.wav");
                 }
 
                 creerTimeline();
