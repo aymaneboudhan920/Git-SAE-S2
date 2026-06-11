@@ -19,13 +19,13 @@ public class ShopVue {
 
     // Les prix du modèle sont maintenant injectés au constructeur
     public ShopVue(Runnable actionFermer, Consumer<String> actionClicItem,
-                   int prixScientifique, int prixChimiste, int prixScanner, int prixRayonX) {
+                   int prixScientifique, int prixChimiste, int prixScanner, int prixRayonX, int prixSoin, int prixRage, int prixGel) {
         this.actionFermer = actionFermer;
         this.actionClicItem = actionClicItem;
-        creerInterface(prixScientifique, prixChimiste, prixScanner, prixRayonX);
+        creerInterface(prixScientifique, prixChimiste, prixScanner, prixRayonX, prixSoin, prixRage, prixGel);
     }
 
-    private void creerInterface(int prixScientifique, int prixChimiste, int prixScanner, int prixRayonX) {
+    private void creerInterface(int prixScientifique, int prixChimiste, int prixScanner, int prixRayonX, int prixSoin, int prixRage, int prixGel) {
         rootShop = new StackPane();
         rootShop.setPrefSize(1020, 680);
         rootShop.getStyleClass().add("fond-flou-shop");
@@ -77,16 +77,16 @@ public class ShopVue {
         HBox containerPotions = new HBox(15);
         containerPotions.setAlignment(Pos.CENTER);
 
-        Button btnRage = creerItem("Rage", "potion_rage.png", "50$");
-        btnRage.setOnAction(e -> declencherAchat("potion_rage"));
-
-        Button btnSoin = creerItem("Soin", "potion_soin.png", "80$");
+        Button btnSoin = creerItem("Soin", "potion_soin.png", prixSoin + "$");
         btnSoin.setOnAction(e -> declencherAchat("potion_soin"));
 
-        Button btnGel = creerItem("Gel", "potion_gel.png", "30$");
+        Button btnRage = creerItem("Rage", "potion_rage.png", prixRage + "$");
+        btnRage.setOnAction(e -> declencherAchat("potion_rage"));
+
+        Button btnGel = creerItem("Gel", "potion_gel.png", prixGel + "$");
         btnGel.setOnAction(e -> declencherAchat("potion_gel"));
 
-        containerPotions.getChildren().addAll(btnRage, btnSoin, btnGel);
+        containerPotions.getChildren().addAll(btnSoin, btnRage, btnGel);
 
         menuInterieur.getChildren().addAll(header, sectionTours, containerTours, sectionPotions, containerPotions);
         rootShop.getChildren().add(menuInterieur);
