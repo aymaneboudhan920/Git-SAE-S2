@@ -7,6 +7,7 @@ public abstract class Tour {
     private int portee, degats, prix, niveau;
     private String nomImage, nomArme;
     private double tempsRechargeRestant = 0.0;
+    private double multiplicateurVitesse = 1.0;
 
     public Tour(double x, double y, int portee, int degats, double vitesseTir, int prix, String nomImage, String nomArme) {
         this.x = x;
@@ -37,6 +38,9 @@ public abstract class Tour {
     public void setPortee(int portee) { this.portee = portee; }
     public void incrementerNiveau() { this.niveau++; }
 
+    public void setMultiplicateurVitesse(double coeff) { this.multiplicateurVitesse = coeff; }
+    public double getMultiplicateurVitesse() { return this.multiplicateurVitesse; }
+
     public void mettreAJourRecharge(double t) {
         if (this.tempsRechargeRestant > 0) {
             this.tempsRechargeRestant -= t;
@@ -48,7 +52,7 @@ public abstract class Tour {
 
     public boolean peutAttaquer() {
         if (this.tempsRechargeRestant <= 0) {
-            this.tempsRechargeRestant = 1.0 / this.getVitesseTir();
+            this.tempsRechargeRestant = 1.0 / (this.getVitesseTir() * this.multiplicateurVitesse);
             return true;
         }
         return false;
