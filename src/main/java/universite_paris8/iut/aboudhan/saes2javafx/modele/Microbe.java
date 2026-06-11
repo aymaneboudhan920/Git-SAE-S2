@@ -20,6 +20,11 @@ public class Microbe {
     }
 
     public void deplacer(){
+
+        if (this.estGele || this.vitesseActu == 0) {
+            return;
+        }
+        
         if (this.waypointCible == null) {
             return;
         }
@@ -51,6 +56,10 @@ public class Microbe {
     }
 
     public void appliquerRalentissement(boolean estRalenti) {
+        if (this.estGele) {
+            return;
+        }
+        
         if (estRalenti) {
             this.vitesseActu = this.vitesseDeBase * 0.5;
         } else {
@@ -87,5 +96,16 @@ public class Microbe {
     }
     public double getVitesseActu() {
         return vitesseActu;
+    }
+    public void setVitesseActu(double valeur) {
+        this.vitesseActu = valeur;
+        if (valeur == 0) {
+            this.estGele = true;
+        }
+    }
+
+    public void reinitialiserVitesse() {
+        this.estGele = false;
+        this.vitesseActu = this.vitesseDeBase;
     }
 }
