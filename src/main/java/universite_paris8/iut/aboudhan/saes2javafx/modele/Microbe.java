@@ -6,6 +6,8 @@ public class Microbe {
     public Waypoint waypointCible;
     public String nomImage;
 
+    private boolean estGele = false;
+
     public Microbe(double v, int pm, int r, int i, String nomImage, Waypoint waypointDepart){
         this.x = waypointDepart.getX();
         this.y = waypointDepart.getY();
