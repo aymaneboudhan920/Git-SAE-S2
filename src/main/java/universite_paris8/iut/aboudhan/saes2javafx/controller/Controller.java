@@ -40,6 +40,15 @@ public class Controller implements Initializable {
     @FXML private ImageView imageInventaire1, imageInventaire2, imageInventaire3, imageInventaire4, imageInventaire5, imageInventaire6, imageInventaire7, imageInventaire8;
     @FXML private Label labelInventaire1, labelInventaire2, labelInventaire3, labelInventaire4, labelInventaire5, labelInventaire6, labelInventaire7, labelInventaire8;
 
+    @FXML private Button btnPotionSoin;
+    @FXML private Button btnPotionRage;
+    @FXML private Button btnPotionGel;
+
+    @FXML private Label labelPotionSoin;
+    @FXML private Label labelPotionRage;
+    @FXML private Label labelPotionGel;
+    @FXML private Button btnPlusShop;
+
     public final Environnement env = new Environnement();
     public Inventaire inventaireModele;
     public InventaireVue inventaireVue;
@@ -206,6 +215,42 @@ public class Controller implements Initializable {
     }
 
     @FXML
+    private void actionBoutonStart() {
+        if (!jeuDemarre && boutonStart != null) {
+            jeuDemarre = true;
+
+            ScaleTransition st = new ScaleTransition(Duration.millis(100), boutonStart);
+            st.setToX(0.95);
+            st.setToY(0.95);
+            st.setAutoReverse(true);
+            st.setCycleCount(2);
+
+            st.setOnFinished(e -> {
+                textStartButtonDisabled();
+
+                if (configJeu != null) {
+                    configJeu.changerDeMusique("musiqueJeu.wav");
+                }
+
+                creerTimeline();
+                if (timeline != null) {
+                    gameLoop.start();
+                    timeline.play();
+                } else {
+                    jeuDemarre = false;
+                    boutonStart.setDisable(false);
+                }
+            });
+
+            st.play();
+        }
+    }
+
+    private void textStartButtonDisabled() {
+        boutonStart.setDisable(true);
+    }
+
+    @FXML
     private void actionBoutonShop() {
         if (shopActuel != null) {
             shopActuel.cacher(conteneurPrincipal);
@@ -306,73 +351,6 @@ public class Controller implements Initializable {
         shopActuel.afficherSur(conteneurPrincipal);
     }
 
-    @FXML
-    private void actionBoutonShop() {
-        if (shopActuel != null) {
-            shopActuel.cacher(conteneurPrincipal);
-            if (jeuDemarre) { gameLoop.start(); timeline.play(); }
-            shopActuel = null;
-            return;
-        }
-
-        if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
-        verrouillerInterface(true); // Verrouille tout derrière
-
-        shopActuel = new ShopVue(
-            () -> {
-                if (shopActuel != null) {
-                    shopActuel.cacher(conteneurPrincipal);
-                    shopActuel = null;
-                    verrouillerInterface(false); // Libère l'interface
-                    if (jeuDemarre) { gameLoop.start(); timeline.play(); }
-                }
-            },
-            (typeItem) -> {
-                if (typeItem.equals("potion_soin") || typeItem.equals("potion_rage") || typeItem.equals("potion_gel")) {
-                    if (shopActuel != null) {
-                        shopActuel.cacher(conteneurPrincipal);
-                        if (jeuDemarre) {
-                            gameLoop.start();
-                            timeline.play();
-                        }
-                        shopActuel = null;
-                        verrouillerInterface(false);
-                    }
-                    return;
-                }
-
-                int prix = switch (typeItem) {
-                    case "scientifique" -> TourScientifique.prixAchat;
-                    case "chimiste" -> TourChimiste.prixAchat;
-                    case "scanner" -> TourScanner.prixAchat;
-                    case "rayon_x" -> TourRayonX.prixAchat;
-                    default -> 0;
-                };
-
-                int caseLibre = inventaireModele.getPremiereCaseLibre();
-                if (env.getArgent() >= prix && caseLibre != -1) {
-                    env.reduireArgent(prix);
-                    // Plus besoin d'actualiser le texte manuellement ici !
-                    updateCompteurs();
-                    inventaireModele.setTourCase(caseLibre, typeItem);
-                    inventaireVue.installerTour(caseLibre, typeItem);
-                }
-
-                if (shopActuel != null) {
-                    shopActuel.cacher(conteneurPrincipal);
-                    shopActuel = null;
-                    verrouillerInterface(false);
-                    if (jeuDemarre) { gameLoop.start(); timeline.play(); }
-                }
-            },
-            TourScientifique.prixAchat,
-            TourChimiste.prixAchat,
-            TourScanner.prixAchat,
-            TourRayonX.prixAchat
-        );
-        shopActuel.afficherSur(conteneurPrincipal);
-    }
-
     private void mettreAJourLabelVague() {
         int numActu = env.getGestionnaireVagues().getNumVagueActu() + 1;
         labelVague.setText("VAGUE " + numActu);
@@ -383,25 +361,25 @@ public class Controller implements Initializable {
         if (vagueActuelle == null) return;
 
         timeline = new Timeline(
-            new KeyFrame(Duration.seconds(vagueActuelle.getTempsIntervalle()), event -> {
-                List<Microbe> fileAttente = vagueActuelle.getFileAttenteMicrobes();
+                new KeyFrame(Duration.seconds(vagueActuelle.getTempsIntervalle()), event -> {
+                    List<Microbe> fileAttente = vagueActuelle.getFileAttenteMicrobes();
 
-                if (!fileAttente.isEmpty()) {
-                    Microbe prochainMicrobe = fileAttente.remove(0);
-                    env.getMicrobesActifs().add(prochainMicrobe);
+                    if (!fileAttente.isEmpty()) {
+                        Microbe prochainMicrobe = fileAttente.remove(0);
+                        env.getMicrobesActifs().add(prochainMicrobe);
 
-                    MicrobeVue vue = new MicrobeVue(
-                            prochainMicrobe.getNomImage(),
-                            prochainMicrobe.getX(),
-                            prochainMicrobe.getY(),
-                            prochainMicrobe.getRatioPV()
-                    );
-                    vuesMicrobes.put(prochainMicrobe, vue);
-                    conteneurPrincipal.getChildren().add(vue);
-                } else {
-                    timeline.stop();
-                }
-            })
+                        MicrobeVue vue = new MicrobeVue(
+                                prochainMicrobe.getNomImage(),
+                                prochainMicrobe.getX(),
+                                prochainMicrobe.getY(),
+                                prochainMicrobe.getRatioPV()
+                        );
+                        vuesMicrobes.put(prochainMicrobe, vue);
+                        conteneurPrincipal.getChildren().add(vue);
+                    } else {
+                        timeline.stop();
+                    }
+                })
         );
         timeline.setCycleCount(Animation.INDEFINITE);
     }
@@ -436,11 +414,11 @@ public class Controller implements Initializable {
                     } else {
                         if (boutonStart != null) boutonStart.setDisable(true);
                         VagueGagneeVue ecranInterVague = new VagueGagneeVue(conteneurPrincipal, grilleJeu, numVagueTerminee,
-                            () -> {
-                                env.getGestionnaireVagues().AugmenterVague();
-                                mettreAJourLabelVague();
-                                if (boutonStart != null) boutonStart.setDisable(false);
-                            });
+                                () -> {
+                                    env.getGestionnaireVagues().AugmenterVague();
+                                    mettreAJourLabelVague();
+                                    if (boutonStart != null) boutonStart.setDisable(false);
+                                });
                         ecranInterVague.afficherSur(conteneurPrincipal);
                     }
                 }
@@ -560,26 +538,26 @@ public class Controller implements Initializable {
         verrouillerInterface(true);
 
         vueInfoActive = new InfoVue(
-            configJeu.getTexteTutorielCourant(),
-            configJeu.estPremierePage(),
-            configJeu.estDernierePage(),
-            () -> {
-                configJeu.pagePrecedente();
-                vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
-            },
-            () -> {
-                configJeu.pageSuivante();
-                vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
-            },
-            () -> {
-                if (vueInfoActive != null) {
-                    vueInfoActive.cacher(conteneurPrincipal);
-                    configJeu.reinitialiserTutoriel();
-                    vueInfoActive = null;
-                    verrouillerInterface(false);
-                    if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                configJeu.getTexteTutorielCourant(),
+                configJeu.estPremierePage(),
+                configJeu.estDernierePage(),
+                () -> {
+                    configJeu.pagePrecedente();
+                    vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
+                },
+                () -> {
+                    configJeu.pageSuivante();
+                    vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
+                },
+                () -> {
+                    if (vueInfoActive != null) {
+                        vueInfoActive.cacher(conteneurPrincipal);
+                        configJeu.reinitialiserTutoriel();
+                        vueInfoActive = null;
+                        verrouillerInterface(false);
+                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                    }
                 }
-            }
         );
         vueInfoActive.afficherSur(conteneurPrincipal);
     }
@@ -610,18 +588,18 @@ public class Controller implements Initializable {
         verrouillerInterface(true);
 
         vueParametresActive = new ParametreVue(
-            configJeu.getVolumeMusique(),
-            configJeu.getVolumeBruitages(),
-            nouveauVolMusique -> configJeu.setVolumeMusique(nouveauVolMusique),
-            nouveauVolBruit -> configJeu.setVolumeBruitages(nouveauVolBruit),
-            () -> {
-                if (vueParametresActive != null) {
-                    vueParametresActive.cacher(conteneurPrincipal);
-                    vueParametresActive = null;
-                    verrouillerInterface(false);
-                    if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                configJeu.getVolumeMusique(),
+                configJeu.getVolumeBruitages(),
+                nouveauVolMusique -> configJeu.setVolumeMusique(nouveauVolMusique),
+                nouveauVolBruit -> configJeu.setVolumeBruitages(nouveauVolBruit),
+                () -> {
+                    if (vueParametresActive != null) {
+                        vueParametresActive.cacher(conteneurPrincipal);
+                        vueParametresActive = null;
+                        verrouillerInterface(false);
+                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                    }
                 }
-            }
         );
         vueParametresActive.afficherSur(conteneurPrincipal);
     }
