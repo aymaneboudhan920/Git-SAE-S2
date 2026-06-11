@@ -16,8 +16,22 @@ import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
 import javafx.util.Duration;
 
-import universite_paris8.iut.aboudhan.saes2javafx.modele.*;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.jeu.Configuration;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.jeu.Environnement;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.microbe.Microbe;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.microbe.Vague;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.tour.*;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.*;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.bouton.InfoVue;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.bouton.ParametreVue;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.bouton.ShopVue;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.bouton.TutorielVue;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.ecran.DefaiteVue;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.ecran.TerrainVue;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.ecran.VagueGagneeVue;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.ecran.VictoireVue;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.tour.InventaireVue;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.tour.TourVue;
 
 public class Controller implements Initializable {
     @FXML public Pane conteneurPrincipal;
@@ -33,10 +47,6 @@ public class Controller implements Initializable {
     @FXML private Label labelInfectes;
     @FXML private Label labelVague;
 
-    @FXML private Button caseInventaire1, caseInventaire2, caseInventaire3, caseInventaire4, caseInventaire5, caseInventaire6, caseInventaire7, caseInventaire8;
-    @FXML private ImageView imageInventaire1, imageInventaire2, imageInventaire3, imageInventaire4, imageInventaire5, imageInventaire6, imageInventaire7, imageInventaire8;
-    @FXML private Label labelInventaire1, labelInventaire2, labelInventaire3, labelInventaire4, labelInventaire5, labelInventaire6, labelInventaire7, labelInventaire8;
-
     @FXML private Button btnPotionSoin;
     @FXML private Button btnPotionRage;
     @FXML private Button btnPotionGel;
@@ -45,6 +55,10 @@ public class Controller implements Initializable {
     @FXML private Label labelPotionRage;
     @FXML private Label labelPotionGel;
     @FXML private Button btnPlusShop;
+
+    @FXML private Button caseInventaire1, caseInventaire2, caseInventaire3, caseInventaire4, caseInventaire5, caseInventaire6, caseInventaire7, caseInventaire8;
+    @FXML private ImageView imageInventaire1, imageInventaire2, imageInventaire3, imageInventaire4, imageInventaire5, imageInventaire6, imageInventaire7, imageInventaire8;
+    @FXML private Label labelInventaire1, labelInventaire2, labelInventaire3, labelInventaire4, labelInventaire5, labelInventaire6, labelInventaire7, labelInventaire8;
 
     public final Environnement env = new Environnement();
     public Inventaire inventaireModele;
@@ -63,6 +77,7 @@ public class Controller implements Initializable {
     private ShopVue shopActuel = null;
 
     private GestionnaireTours gestionnaireTours;
+
     private Configuration configJeu;
     private ParametreVue vueParametresActive = null;
     private TutorielVue vueTutorielActive = null;
@@ -75,29 +90,35 @@ public class Controller implements Initializable {
         TerrainVue terrainVue = new TerrainVue(env.getGrille(), env.getTailleTuile());
         terrainVue.dessinerTerrain(grilleJeu);
 
+        // Préparer les vagues du jeu
         env.getGestionnaireVagues().initialiserVagues(env);
 
-        // Bindings de l'interface
+        // Bindings pour l'argent et le nb d'infections
         labelArgent.textProperty().bind(env.argentProperty().asString());
         labelInfectes.textProperty().bind(env.gensInfectesProperty().asString());
         labelPotionSoin.textProperty().bind(env.nbPotionSoinProperty().asString());
         labelPotionRage.textProperty().bind(env.nbPotionRageProperty().asString());
         labelPotionGel.textProperty().bind(env.nbPotionGelProperty().asString());
 
+        // Premier rafraîchissement des compteurs et label de la vague
         updateCompteurs();
         mettreAJourLabelVague();
 
+        // Création de la loop et de la timeline
         creerGameLoop();
         creerTimeline();
 
+        // On rassemble les éléments de l'inventaire individuellement dans des listes
         boutonsInventaire.addAll(Arrays.asList(caseInventaire1, caseInventaire2, caseInventaire3, caseInventaire4, caseInventaire5, caseInventaire6, caseInventaire7, caseInventaire8));
         imagesInventaire.addAll(Arrays.asList(imageInventaire1, imageInventaire2, imageInventaire3, imageInventaire4, imageInventaire5, imageInventaire6, imageInventaire7, imageInventaire8));
         labelsInventaire.addAll(Arrays.asList(labelInventaire1, labelInventaire2, labelInventaire3, labelInventaire4, labelInventaire5, labelInventaire6, labelInventaire7, labelInventaire8));
 
+        // Création des structures d'inventaire et du gestionnaire de tours
         this.inventaireModele = new Inventaire(8);
         this.inventaireVue = new InventaireVue(boutonsInventaire, imagesInventaire, labelsInventaire);
         this.gestionnaireTours = new GestionnaireTours(this.env);
 
+        // Configuration des boutons de l'inventaire
         for (int i = 0; i < boutonsInventaire.size(); i++) {
             final int indexActuel = i;
             Button btn = boutonsInventaire.get(i);
@@ -110,33 +131,42 @@ public class Controller implements Initializable {
 
                 if (tourRappelee) {
                     vuesTours.entrySet().removeIf(association -> {
+                        // On regarde dans le modèle si cette tour correspond à notre index d'inventaire
                         Integer indexModele = env.getTourVersIndexInventaire().get(association.getKey());
                         if (indexModele != null && indexModele == indexActuel) {
+                            // On enlève l'image de l'écran
                             conteneurPrincipal.getChildren().remove(association.getValue());
-                            return true;
+                            return true; // Supprime l'élément de la map vuesTours
                         }
                         return false;
                     });
+
+                    // Remise à zéro visuelle du bouton pour qu'il soit à nouveau disponible au placement
                     btn.getStyleClass().remove("case-tour-posee");
                     btn.getStyleClass().remove("case-inventaire-selectionnee");
-                    btn.setDisable(false);
+                    btn.setDisable(false); // Reste activé pour être replacé plus tard !
+
                 } else if (gestionnaireTours.isModePlacementTour()) {
-                    for (Button b : boutonsInventaire) b.getStyleClass().remove("case-inventaire-selectionnee");
+                    for (Button b : boutonsInventaire)
+                        b.getStyleClass().remove("case-inventaire-selectionnee");
                     btn.getStyleClass().add("case-inventaire-selectionnee");
                 }
             });
         }
 
+        // Si on clique n'importe où sur l'écran, le gestionnaire regarde si on veut poser une tour
         conteneurPrincipal.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.SECONDARY) {
                 gestionnaireTours.annulerPlacement();
-                for (Button b : boutonsInventaire) b.getStyleClass().remove("case-inventaire-selectionnee");
+                for (Button b : boutonsInventaire)
+                    b.getStyleClass().remove("case-inventaire-selectionnee");
                 return;
             }
 
             double xSurGrille = event.getX() - grilleJeu.getLayoutX();
             double ySurGrille = event.getY() - grilleJeu.getLayoutY();
 
+            // On demande au modèle s'il crée une tour suite à ce clic
             int indexBouton = gestionnaireTours.getIndexInventaireActu();
             Tour nouvelleTour = gestionnaireTours.gererClicTerrain(xSurGrille, ySurGrille);
 
@@ -160,7 +190,8 @@ public class Controller implements Initializable {
                 caseInventaire.getStyleClass().add("case-tour-posee");
                 caseInventaire.setDisable(false);
 
-                if (!jeuDemarre && boutonStart != null) boutonStart.setDisable(false);
+                if (!jeuDemarre && boutonStart != null)
+                    boutonStart.setDisable(false);
             }
         });
     }
@@ -177,10 +208,12 @@ public class Controller implements Initializable {
         if (btnPotionGel != null) btnPotionGel.setDisable(verrouiller);
         if (btnPlusShop != null) btnPlusShop.setDisable(verrouiller);
 
+        // Gestion de l'inventaire
         for (int i = 0; i < boutonsInventaire.size(); i++) {
             if (verrouiller) {
                 boutonsInventaire.get(i).setDisable(true);
             } else {
+                // Au déverrouillage, on ne réactive que les cases qui possèdent une tour achetée
                 String typeTour = inventaireModele.getTourCase(i);
                 boutonsInventaire.get(i).setDisable(typeTour == null);
             }
@@ -201,12 +234,17 @@ public class Controller implements Initializable {
             jeuDemarre = true;
 
             ScaleTransition st = new ScaleTransition(Duration.millis(100), boutonStart);
-            st.setToX(0.95); st.setToY(0.95);
-            st.setAutoReverse(true); st.setCycleCount(2);
+            st.setToX(0.95);
+            st.setToY(0.95);
+            st.setAutoReverse(true);
+            st.setCycleCount(2);
 
             st.setOnFinished(e -> {
                 boutonStart.setDisable(true);
-                if (configJeu != null) configJeu.changerDeMusique("musiqueJeu.wav");
+
+                if (configJeu != null) {
+                    configJeu.changerDeMusique("musiqueJeu.wav");
+                }
 
                 creerTimeline();
                 if (timeline != null) {
@@ -217,6 +255,7 @@ public class Controller implements Initializable {
                     boutonStart.setDisable(false);
                 }
             });
+
             st.play();
         }
     }
@@ -299,26 +338,29 @@ public class Controller implements Initializable {
         if (vagueActuelle == null) return;
 
         timeline = new Timeline(
-                new KeyFrame(Duration.seconds(vagueActuelle.getTempsIntervalle()), event -> {
-                    if (env.isMicrobesGeles()) {
-                        return;
-                    }
+            new KeyFrame(Duration.seconds(vagueActuelle.getTempsIntervalle()), event -> {
+                if (env.isMicrobesGeles()) {
+                    return;
+                }
 
-                    List<Microbe> fileAttente = vagueActuelle.getFileAttenteMicrobes();
+                List<Microbe> fileAttente = vagueActuelle.getFileAttenteMicrobes();
 
-                    if (!fileAttente.isEmpty()) {
-                        Microbe prochainMicrobe = fileAttente.remove(0);
-                        env.getMicrobesActifs().add(prochainMicrobe);
+                if (!fileAttente.isEmpty()) {
+                    Microbe prochainMicrobe = fileAttente.remove(0);
+                    env.getMicrobesActifs().add(prochainMicrobe);
 
-                        MicrobeVue vue = new MicrobeVue(
-                                prochainMicrobe.getNomImage(), prochainMicrobe.getX(), prochainMicrobe.getY(), prochainMicrobe.getRatioPV()
-                        );
-                        vuesMicrobes.put(prochainMicrobe, vue);
-                        conteneurPrincipal.getChildren().add(vue);
-                    } else {
-                        timeline.stop();
-                    }
-                })
+                    MicrobeVue vue = new MicrobeVue(
+                            prochainMicrobe.getNomImage(),
+                            prochainMicrobe.getX(),
+                            prochainMicrobe.getY(),
+                            prochainMicrobe.getRatioPV()
+                    );
+                    vuesMicrobes.put(prochainMicrobe, vue);
+                    conteneurPrincipal.getChildren().add(vue);
+                } else {
+                    timeline.stop();
+                }
+            })
         );
         timeline.setCycleCount(Animation.INDEFINITE);
     }
@@ -327,6 +369,7 @@ public class Controller implements Initializable {
         gameLoop = new AnimationTimer() {
             @Override
             public void handle(long now) {
+                // Condition de défaite
                 if (env.verifierDefaite()) {
                     gameLoop.stop();
                     if (timeline != null) timeline.stop();
@@ -335,6 +378,7 @@ public class Controller implements Initializable {
                     return;
                 }
 
+                // Condition de victoire de la vague
                 Vague vagueActuelle = env.getGestionnaireVagues().getVagueActuelle();
                 if (vagueActuelle != null && vagueActuelle.getFileAttenteMicrobes().isEmpty()
                         && env.getMicrobesActifs().isEmpty() && jeuDemarre) {
@@ -351,22 +395,23 @@ public class Controller implements Initializable {
                     } else {
                         if (boutonStart != null) boutonStart.setDisable(true);
                         VagueGagneeVue ecranInterVague = new VagueGagneeVue(conteneurPrincipal, grilleJeu, numVagueTerminee,
-                                () -> {
-                                    env.getGestionnaireVagues().AugmenterVague();
-                                    mettreAJourLabelVague();
-                                    if (boutonStart != null) boutonStart.setDisable(false);
-                                });
+                            () -> {
+                                env.getGestionnaireVagues().AugmenterVague();
+                                mettreAJourLabelVague();
+                                if (boutonStart != null) boutonStart.setDisable(false);
+                            });
                         ecranInterVague.afficherSur(conteneurPrincipal);
                     }
                 }
 
-                // Actualisation des positions et sorties gérée de manière sécurisée par le modèle
+                // Si un microbe est sorti, l'argent/infectés s'adaptent d'eux-mêmes, on met à jour les styles
                 boolean ennemiSorti = env.updateMicrobes();
                 if (ennemiSorti) {
                     updateCompteurs();
                 }
 
                 double tps = 0.012;
+
                 List<Tour> toursEnJeu = new ArrayList<>(vuesTours.keySet());
                 for (Tour tour : toursEnJeu) {
                     tour.mettreAJourRecharge(tps);
@@ -374,6 +419,7 @@ public class Controller implements Initializable {
                 }
 
                 boolean unMicrobeEstMort = false;
+
                 for (Microbe m : env.getMicrobesActifs()) {
                     if (m.estMort()) {
                         env.ajouterArgent(m.getRecompense());
@@ -390,7 +436,8 @@ public class Controller implements Initializable {
                 List<Microbe> copiesActifs = new ArrayList<>(env.getMicrobesActifs());
                 for (Microbe m : copiesActifs) {
                     MicrobeVue imageVue = vuesMicrobes.get(m);
-                    if (imageVue != null) imageVue.mettreAJour(m.getX(), m.getY(), m.getRatioPV());
+                    if (imageVue != null)
+                        imageVue.mettreAJour(m.getX(), m.getY(), m.getRatioPV());
                 }
 
                 vuesMicrobes.keySet().removeIf(m -> {
@@ -423,10 +470,15 @@ public class Controller implements Initializable {
     }
 
     private void reinitialiserJeuVisuel() {
-        for (MicrobeVue vueM : vuesMicrobes.values()) conteneurPrincipal.getChildren().remove(vueM);
+        for (MicrobeVue vueM : vuesMicrobes.values()) {
+            conteneurPrincipal.getChildren().remove(vueM);
+        }
+
         vuesMicrobes.clear();
 
-        for (TourVue vueT : vuesTours.values()) conteneurPrincipal.getChildren().remove(vueT);
+        for (TourVue vueT : vuesTours.values()) {
+            conteneurPrincipal.getChildren().remove(vueT);
+        }
         vuesTours.clear();
 
         conteneurPrincipal.getChildren().clear();
@@ -447,7 +499,10 @@ public class Controller implements Initializable {
             boutonsInventaire.get(i).getStyleClass().remove("case-inventaire-selectionnee");
         }
 
-        if (configJeu != null) configJeu.changerDeMusique("musiqueMenu.wav");
+        if (configJeu != null) {
+            configJeu.changerDeMusique("musiqueMenu.wav");
+        }
+
         gestionnaireTours.reinitialiser();
 
         updateCompteurs();
@@ -461,24 +516,26 @@ public class Controller implements Initializable {
         verrouillerInterface(true);
 
         vueInfoActive = new InfoVue(
-                configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage(),
-                () -> {
-                    configJeu.pagePrecedente();
-                    vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
-                },
-                () -> {
-                    configJeu.pageSuivante();
-                    vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
-                },
-                () -> {
-                    if (vueInfoActive != null) {
-                        vueInfoActive.cacher(conteneurPrincipal);
-                        configJeu.reinitialiserTutoriel();
-                        vueInfoActive = null;
-                        verrouillerInterface(false);
-                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
-                    }
+            configJeu.getTexteTutorielCourant(),
+            configJeu.estPremierePage(),
+            configJeu.estDernierePage(),
+            () -> {
+                configJeu.pagePrecedente();
+                vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
+            },
+            () -> {
+                configJeu.pageSuivante();
+                vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
+            },
+            () -> {
+                if (vueInfoActive != null) {
+                    vueInfoActive.cacher(conteneurPrincipal);
+                    configJeu.reinitialiserTutoriel();
+                    vueInfoActive = null;
+                    verrouillerInterface(false);
+                    if (jeuDemarre) { gameLoop.start(); timeline.play(); }
                 }
+            }
         );
         vueInfoActive.afficherSur(conteneurPrincipal);
     }
@@ -486,6 +543,7 @@ public class Controller implements Initializable {
     @FXML
     private void actionBoutonTuto() {
         if (vueTutorielActive != null) return;
+
         if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
         verrouillerInterface(true);
 
@@ -503,21 +561,23 @@ public class Controller implements Initializable {
     @FXML
     private void actionBoutonParametres() {
         if (vueParametresActive != null) return;
+
         if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
         verrouillerInterface(true);
 
         vueParametresActive = new ParametreVue(
-                configJeu.getVolumeMusique(), configJeu.getVolumeBruitages(),
-                nouveauVolMusique -> configJeu.setVolumeMusique(nouveauVolMusique),
-                nouveauVolBruit -> configJeu.setVolumeBruitages(nouveauVolBruit),
-                () -> {
-                    if (vueParametresActive != null) {
-                        vueParametresActive.cacher(conteneurPrincipal);
-                        vueParametresActive = null;
-                        verrouillerInterface(false);
-                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
-                    }
+            configJeu.getVolumeMusique(),
+            configJeu.getVolumeBruitages(),
+            nouveauVolMusique -> configJeu.setVolumeMusique(nouveauVolMusique),
+            nouveauVolBruit -> configJeu.setVolumeBruitages(nouveauVolBruit),
+            () -> {
+                if (vueParametresActive != null) {
+                    vueParametresActive.cacher(conteneurPrincipal);
+                    vueParametresActive = null;
+                    verrouillerInterface(false);
+                    if (jeuDemarre) { gameLoop.start(); timeline.play(); }
                 }
+            }
         );
         vueParametresActive.afficherSur(conteneurPrincipal);
     }
