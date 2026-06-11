@@ -21,6 +21,14 @@ public class Environnement {
     private final Map<Tour, Integer> tourVersIndexInventaire = new HashMap<>();
     private final Map<Tour, int[]> tourVersCaseGrille = new HashMap<>();
 
+    private final IntegerProperty nbPotionSoin = new SimpleIntegerProperty(0);
+    private final IntegerProperty nbPotionRage = new SimpleIntegerProperty(0);
+    private final IntegerProperty nbPotionGel = new SimpleIntegerProperty(0);
+
+    public final int prix_potion_soin = 250;
+    public final int prix_potion_rage = 300;
+    public final int prix_potion_gel = 400;
+
     public Environnement() {
         this.terrain = new Terrain();
         this.grille = this.terrain.grille;
@@ -35,6 +43,17 @@ public class Environnement {
     public GestionnaireVagues getGestionnaireVagues() { return gestionnaireVagues; }
     public List<Microbe> getMicrobesActifs() { return microbesActifs; }
     public Map<Tour, Integer> getTourVersIndexInventaire() { return tourVersIndexInventaire; }
+    public int getNbPotionSoin() { return this.nbPotionSoin.get(); }
+    public void setNbPotionSoin(int valeur) { this.nbPotionSoin.set(valeur); }
+    public IntegerProperty nbPotionSoinProperty() { return this.nbPotionSoin; }
+
+    public int getNbPotionRage() { return this.nbPotionRage.get(); }
+    public void setNbPotionRage(int valeur) { this.nbPotionRage.set(valeur); }
+    public IntegerProperty nbPotionRageProperty() { return this.nbPotionRage; }
+
+    public int getNbPotionGel() { return this.nbPotionGel.get(); }
+    public void setNbPotionGel(int valeur) { this.nbPotionGel.set(valeur); }
+    public IntegerProperty nbPotionGelProperty() { return this.nbPotionGel; }
 
     public IntegerProperty argentProperty() { return this.argent; }
     public IntegerProperty gensInfectesProperty() { return this.gensInfectes; }
@@ -103,6 +122,10 @@ public class Environnement {
 
         this.argent.set(100);
         this.gensInfectes.set(0);
+
+        this.nbPotionSoin.set(0);
+        this.nbPotionRage.set(0);
+        this.nbPotionGel.set(0);
 
         this.gestionnaireVagues.listeVagues.clear();
         this.gestionnaireVagues.numVagueActu = 0;
