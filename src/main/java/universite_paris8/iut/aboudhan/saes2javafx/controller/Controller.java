@@ -180,6 +180,11 @@ public class Controller implements Initializable {
         if (boutonParametres != null) boutonParametres.setDisable(verrouiller);
         if (boutonInfo != null) boutonInfo.setDisable(verrouiller);
 
+        if (btnPotionSoin != null) btnPotionSoin.setDisable(verrouiller);
+        if (btnPotionRage != null) btnPotionRage.setDisable(verrouiller);
+        if (btnPotionGel != null) btnPotionGel.setDisable(verrouiller);
+        if (btnPlusShop != null) btnPlusShop.setDisable(verrouiller);
+
         // Gestion de l'inventaire
         for (int i = 0; i < boutonsInventaire.size(); i++) {
             if (verrouiller) {
@@ -201,35 +206,104 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    private void actionBoutonStart() {
-        if (!jeuDemarre && boutonStart != null) {
-            jeuDemarre = true;
-
-            ScaleTransition st = new ScaleTransition(Duration.millis(100), boutonStart);
-            st.setToX(0.95);
-            st.setToY(0.95);
-            st.setAutoReverse(true);
-            st.setCycleCount(2);
-
-            st.setOnFinished(e -> {
-                boutonStart.setDisable(true);
-
-                if (configJeu != null) {
-                    configJeu.changerDeMusique("musiqueJeu.wav");
-                }
-
-                creerTimeline();
-                if (timeline != null) {
-                    gameLoop.start();
-                    timeline.play();
-                } else {
-                    jeuDemarre = false;
-                    boutonStart.setDisable(false);
-                }
-            });
-
-            st.play();
+    private void actionBoutonShop() {
+        if (shopActuel != null) {
+            shopActuel.cacher(conteneurPrincipal);
+            if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+            shopActuel = null;
+            return;
         }
+
+        if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
+        verrouillerInterface(true);
+
+        shopActuel = new ShopVue(
+                () -> {
+                    if (shopActuel != null) {
+                        shopActuel.cacher(conteneurPrincipal);
+                        shopActuel = null;
+                        verrouillerInterface(false);
+                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                    }
+                },
+                (typeItem) -> {
+                    if (typeItem.equals("potion_soin")) {
+                        if (env.getArgent() >= env.prix_potion_soin) {
+                            env.reduireArgent(env.prix_potion_soin);
+                            env.setNbPotionSoin(env.getNbPotionSoin() + 1);
+                            rafraichirAffichagePotions();
+                        }
+                        if (shopActuel != null) {
+                            shopActuel.cacher(conteneurPrincipal);
+                            shopActuel = null;
+                            verrouillerInterface(false);
+                            if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                        }
+                        return;
+                    }
+
+                    if (typeItem.equals("potion_rage")) {
+                        if (env.getArgent() >= env.prix_potion_rage) {
+                            env.reduireArgent(env.prix_potion_rage);
+                            env.setNbPotionRage(env.getNbPotionRage() + 1);
+                            rafraichirAffichagePotions();
+                        }
+                        if (shopActuel != null) {
+                            shopActuel.cacher(conteneurPrincipal);
+                            shopActuel = null;
+                            verrouillerInterface(false);
+                            if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                        }
+                        return;
+                    }
+
+                    if (typeItem.equals("potion_gel")) {
+                        if (env.getArgent() >= env.prix_potion_gel) {
+                            env.reduireArgent(env.prix_potion_gel);
+                            env.setNbPotionGel(env.getNbPotionGel() + 1);
+                            rafraichirAffichagePotions();
+                        }
+                        if (shopActuel != null) {
+                            shopActuel.cacher(conteneurPrincipal);
+                            shopActuel = null;
+                            verrouillerInterface(false);
+                            if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                        }
+                        return;
+                    }
+
+                    int prix = switch (typeItem) {
+                        case "scientifique" -> TourScientifique.prixAchat;
+                        case "chimiste" -> TourChimiste.prixAchat;
+                        case "scanner" -> TourScanner.prixAchat;
+                        case "rayon_x" -> TourRayonX.prixAchat;
+                        default -> 0;
+                    };
+
+                    int caseLibre = inventaireModele.getPremiereCaseLibre();
+                    if (env.getArgent() >= prix && caseLibre != -1) {
+                        env.reduireArgent(prix);
+                        updateCompteurs();
+                        inventaireModele.setTourCase(caseLibre, typeItem);
+                        inventaireVue.installerTour(caseLibre, typeItem);
+                    }
+
+                    if (shopActuel != null) {
+                        shopActuel.cacher(conteneurPrincipal);
+                        shopActuel = null;
+                        verrouillerInterface(false);
+                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                    }
+                },
+                TourScientifique.prixAchat,
+                TourChimiste.prixAchat,
+                TourScanner.prixAchat,
+                TourRayonX.prixAchat,
+                env.prix_potion_rage,
+                env.prix_potion_soin,
+                env.prix_potion_gel
+        );
+        shopActuel.afficherSur(conteneurPrincipal);
     }
 
     @FXML
@@ -550,5 +624,35 @@ public class Controller implements Initializable {
             }
         );
         vueParametresActive.afficherSur(conteneurPrincipal);
+    }
+
+    private void rafraichirAffichagePotions() {
+        if (labelPotionSoin != null) labelPotionSoin.setText(String.valueOf(env.getNbPotionSoin()));
+        if (labelPotionRage != null) labelPotionRage.setText(String.valueOf(env.getNbPotionRage()));
+        if (labelPotionGel != null) labelPotionGel.setText(String.valueOf(env.getNbPotionGel()));
+    }
+
+    @FXML
+    private void actionUtiliserSoin() {
+        if (env.getNbPotionSoin() > 0) {
+            env.setNbPotionSoin(env.getNbPotionSoin() - 1);
+            rafraichirAffichagePotions();
+        }
+    }
+
+    @FXML
+    private void actionUtiliserRage() {
+        if (env.getNbPotionRage() > 0) {
+            env.setNbPotionRage(env.getNbPotionRage() - 1);
+            rafraichirAffichagePotions();
+        }
+    }
+
+    @FXML
+    private void actionUtiliserGel() {
+        if (env.getNbPotionGel() > 0) {
+            env.setNbPotionGel(env.getNbPotionGel() - 1);
+            rafraichirAffichagePotions();
+        }
     }
 }
