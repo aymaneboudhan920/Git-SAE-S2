@@ -299,6 +299,9 @@ public class Controller implements Initializable {
         if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
         verrouillerInterface(true);
 
+        // Récupération de la vague actuelle (ex: index 0 -> Vague 1)
+        int vagueActu = env.getGestionnaireVagues().getNumVagueActu() + 1;
+
         shopActuel = new ShopVue(
                 () -> {
                     if (shopActuel != null) {
@@ -349,6 +352,7 @@ public class Controller implements Initializable {
                         if (jeuDemarre) { gameLoop.start(); timeline.play(); }
                     }
                 },
+                vagueActu,
                 TourScientifique.prixAchat, TourChimiste.prixAchat, TourScanner.prixAchat, TourRayonX.prixAchat,
                 PotionSoin.prixAchat, PotionRage.prixAchat, PotionGel.prixAchat
         );
