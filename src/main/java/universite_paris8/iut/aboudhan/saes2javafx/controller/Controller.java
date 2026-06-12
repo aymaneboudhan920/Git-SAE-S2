@@ -131,47 +131,71 @@ public class Controller implements Initializable {
             btn.setOnMouseClicked(event -> {
                 String typeTour = inventaireModele.getTourCase(indexActuel);
 
-                // Si la case est vide (pas de tour achetée dedans), on ne fait rien
                 if (typeTour == null || typeTour.isEmpty()) {
                     return;
                 }
 
-                // CLIC DROIT -> Rappeler la tour qui est posée sur le terrain
+                // CLIC DROIT -> Ranger la tour posée sur le terrain dans l'inventaire
                 if (event.getButton() == MouseButton.SECONDARY) {
+
+                    // On cherche d'abord s'il y a une tour associée à cet index dans le modèle avant qu'elle soit supprimée
+                    Tour tourAEnlever = null;
+                    for (java.util.Map.Entry<Tour, Integer> assoc : env.getTourVersIndexInventaire().entrySet()) {
+                        if (assoc.getValue() == indexActuel) {
+                            tourAEnlever = assoc.getKey();
+                            break;
+                        }
+                    }
+
+                    // On appelle le gestionnaire pour mettre à jour le modèle
                     boolean tourRappelee = gestionnaireTours.gererClicInventaire(indexActuel, typeTour);
 
-                    if (tourRappelee) {
+                    if (tourRappelee || tourAEnlever != null) {
+                        final Tour tourFinale = tourAEnlever;
+
+                        // Supprime visuellement la vue de la tour du terrain JavaFX
                         vuesTours.entrySet().removeIf(association -> {
-                            Integer indexModele = env.getTourVersIndexInventaire().get(association.getKey());
-                            if (indexModele != null && indexModele == indexActuel) {
+                            // On compare soit par l'instance de la tour trouvée, soit par l'index enregistré dans l'env
+                            if (association.getKey() == tourFinale ||
+                                    (env.getTourVersIndexInventaire().containsKey(association.getKey()) &&
+                                            env.getTourVersIndexInventaire().get(association.getKey()) == indexActuel)) {
+
                                 conteneurPrincipal.getChildren().remove(association.getValue());
                                 return true; // Supprime de la map vuesTours
                             }
                             return false;
                         });
 
-                        // Réinitialisation complète de l'état graphique du bouton
-                        btn.getStyleClass().removeAll("case-tour-posee", "case-inventaire-selectionnee");
+                        // Nettoyage complet des styles CSS sur le bouton d'inventaire
+                        while (btn.getStyleClass().contains("case-tour-posee")) {
+                            btn.getStyleClass().remove("case-tour-posee");
+                        }
+                        while (btn.getStyleClass().contains("case-inventaire-selectionnee")) {
+                            btn.getStyleClass().remove("case-inventaire-selectionnee");
+                        }
 
                         // Force la vue à réinstaller proprement l'image de la tour dans l'inventaire
                         inventaireVue.installerTour(indexActuel, typeTour);
                         btn.setDisable(false);
 
-                        // On annule le placement automatique direct pour pouvoir la reposer tranquillement au clic gauche
+                        // On annule tout état de placement résiduel pour repartir sur de bonnes bases
                         gestionnaireTours.annulerPlacement();
                     }
                 }
 
-                // CLIC GAUCHE -> Sélectionner la tour disponible pour la poser ou la reposer
+                // CLIC GAUCHE -> Sélectionner la tour pour la poser ou la REPOSER
                 else if (event.getButton() == MouseButton.PRIMARY) {
 
-                    // On ne peut sélectionner la case QUE si la tour n'est pas déjà déployée sur la map
+                    // On ne peut la sélectionner au clic gauche QUE si elle n'est pas déjà sur la map
                     if (!btn.getStyleClass().contains("case-tour-posee")) {
 
-                        // On force le gestionnaire à passer en mode placement avec le BON index d'inventaire
+                        // Sécurité : on annule d'abord tout placement précédent
+                        gestionnaireTours.annulerPlacement();
+
+                        // On active le mode placement
                         gestionnaireTours.gererClicInventaire(indexActuel, typeTour);
 
-                        // Gestion visuelle de la sélection (bordure jaune ou style CSS dédié)
+                        // Gestion visuelle de la sélection (bordure jaune)
                         for (Button b : boutonsInventaire) {
                             b.getStyleClass().remove("case-inventaire-selectionnee");
                         }
