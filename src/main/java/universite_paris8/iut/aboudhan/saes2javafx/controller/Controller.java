@@ -128,31 +128,55 @@ public class Controller implements Initializable {
             btn.setDisable(true);
             labelsInventaire.get(i).setText("");
 
-            btn.setOnAction(event -> {
+            btn.setOnMouseClicked(event -> {
                 String typeTour = inventaireModele.getTourCase(indexActuel);
-                boolean tourRappelee = gestionnaireTours.gererClicInventaire(indexActuel, typeTour);
 
-                if (tourRappelee) {
-                    vuesTours.entrySet().removeIf(association -> {
-                        // On regarde dans le modèle si cette tour correspond à notre index d'inventaire
-                        Integer indexModele = env.getTourVersIndexInventaire().get(association.getKey());
-                        if (indexModele != null && indexModele == indexActuel) {
-                            // On enlève l'image de l'écran
-                            conteneurPrincipal.getChildren().remove(association.getValue());
-                            return true; // Supprime l'élément de la map vuesTours
+                // Si la case est vide (pas de tour achetée dedans), on ne fait rien
+                if (typeTour == null || typeTour.isEmpty()) {
+                    return;
+                }
+
+                // CLIC DROIT -> Rappeler la tour qui est posée sur le terrain
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    boolean tourRappelee = gestionnaireTours.gererClicInventaire(indexActuel, typeTour);
+
+                    if (tourRappelee) {
+                        vuesTours.entrySet().removeIf(association -> {
+                            Integer indexModele = env.getTourVersIndexInventaire().get(association.getKey());
+                            if (indexModele != null && indexModele == indexActuel) {
+                                conteneurPrincipal.getChildren().remove(association.getValue());
+                                return true; // Supprime de la map vuesTours
+                            }
+                            return false;
+                        });
+
+                        // Réinitialisation complète de l'état graphique du bouton
+                        btn.getStyleClass().removeAll("case-tour-posee", "case-inventaire-selectionnee");
+
+                        // Force la vue à réinstaller proprement l'image de la tour dans l'inventaire
+                        inventaireVue.installerTour(indexActuel, typeTour);
+                        btn.setDisable(false);
+
+                        // On annule le placement automatique direct pour pouvoir la reposer tranquillement au clic gauche
+                        gestionnaireTours.annulerPlacement();
+                    }
+                }
+
+                // CLIC GAUCHE -> Sélectionner la tour disponible pour la poser ou la reposer
+                else if (event.getButton() == MouseButton.PRIMARY) {
+
+                    // On ne peut sélectionner la case QUE si la tour n'est pas déjà déployée sur la map
+                    if (!btn.getStyleClass().contains("case-tour-posee")) {
+
+                        // On force le gestionnaire à passer en mode placement avec le BON index d'inventaire
+                        gestionnaireTours.gererClicInventaire(indexActuel, typeTour);
+
+                        // Gestion visuelle de la sélection (bordure jaune ou style CSS dédié)
+                        for (Button b : boutonsInventaire) {
+                            b.getStyleClass().remove("case-inventaire-selectionnee");
                         }
-                        return false;
-                    });
-
-                    // Remise à zéro visuelle du bouton pour qu'il soit à nouveau disponible au placement
-                    btn.getStyleClass().remove("case-tour-posee");
-                    btn.getStyleClass().remove("case-inventaire-selectionnee");
-                    btn.setDisable(false); // Reste activé pour être replacé plus tard !
-
-                } else if (gestionnaireTours.isModePlacementTour()) {
-                    for (Button b : boutonsInventaire)
-                        b.getStyleClass().remove("case-inventaire-selectionnee");
-                    btn.getStyleClass().add("case-inventaire-selectionnee");
+                        btn.getStyleClass().add("case-inventaire-selectionnee");
+                    }
                 }
             });
         }
