@@ -19,13 +19,13 @@ public class ShopVue {
 
     // Les prix du modèle sont maintenant injectés au constructeur
     public ShopVue(Runnable actionFermer, Consumer<String> actionClicItem,
-                   int prixScientifique, int prixChimiste, int prixScanner, int prixRayonX, int prixSoin, int prixRage, int prixGel) {
+                   int numVagueActuelle, int prixScientifique, int prixChimiste, int prixScanner, int prixRayonX, int prixSoin, int prixRage, int prixGel) {
         this.actionFermer = actionFermer;
         this.actionClicItem = actionClicItem;
-        creerInterface(prixScientifique, prixChimiste, prixScanner, prixRayonX, prixSoin, prixRage, prixGel);
+        creerInterface(numVagueActuelle, prixScientifique, prixChimiste, prixScanner, prixRayonX, prixSoin, prixRage, prixGel);
     }
 
-    private void creerInterface(int prixScientifique, int prixChimiste, int prixScanner, int prixRayonX, int prixSoin, int prixRage, int prixGel) {
+    private void creerInterface(int numVagueActuelle, int prixScientifique, int prixChimiste, int prixScanner, int prixRayonX, int prixSoin, int prixRage, int prixGel) {
         rootShop = new StackPane();
         rootShop.setPrefSize(1020, 680);
         rootShop.getStyleClass().add("fond-flou-shop");
