@@ -22,15 +22,17 @@ public class GestionnaireTours {
 
         Tour tourPosee = trouverTourPosee(index);
 
+        // Si une tour existe sur le terrain pour cet index d'inventaire, on la range
         if (tourPosee != null) {
             env.rappelerTour(tourPosee);
-            return true;
+            return true; // Indique qu'une tour a été rangée
         }
+        // Sinon, on passe en mode placement (clic gauche pour poser)
         else {
             modePlacementTour = true;
             tourCliquee = typeTour;
             indexInventaireActu = index;
-            return false;
+            return false; // Indique qu'on prépare un placement
         }
     }
 
