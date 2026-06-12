@@ -518,3 +518,18 @@
 .slider {
     -fx-cursor: hand;
 }
+
+.btn-item-shop:disabled {
+    -fx-opacity: 0.4;
+    -fx-cursor: DEFAULT;
+    -fx-border-color: red;
+}
+
+.texte-potion-bloquee {
+    -fx-font-family: "Impact", "Arial Black", sans-serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ff2222; /* Rouge pétant */
+    /* Petite ombre portée pour détacher le texte du fond */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.9), 4, 0, 0, 0);
+}
