@@ -80,13 +80,55 @@ public class ShopVue {
         Button btnSoin = creerItem("Soin", "potion_soin.png", prixSoin + "$");
         btnSoin.setOnAction(e -> declencherAchat("potion_soin"));
 
+        StackPane conteneurSoin = new StackPane();
+        conteneurSoin.getChildren().add(btnSoin);
+
+        if (numVagueActuelle < 3) {
+            btnSoin.setDisable(true);
+            btnSoin.getStyleClass().add("btn-item-bloque");
+
+            Label txtBloque = new Label("VAGUE 3");
+            txtBloque.getStyleClass().add("texte-potion-bloquee");
+            txtBloque.setRotate(-30); // Permet de mettre le texte du Label en diagonal
+            txtBloque.setMouseTransparent(true);
+            conteneurSoin.getChildren().add(txtBloque);
+        }
+
         Button btnRage = creerItem("Rage", "potion_rage.png", prixRage + "$");
         btnRage.setOnAction(e -> declencherAchat("potion_rage"));
+
+        StackPane conteneurRage = new StackPane();
+        conteneurRage.getChildren().add(btnRage);
+
+        if (numVagueActuelle < 5) {
+            btnRage.setDisable(true);
+            btnRage.getStyleClass().add("btn-item-bloque");
+
+            Label txtBloque = new Label("VAGUE 5");
+            txtBloque.getStyleClass().add("texte-potion-bloquee");
+            txtBloque.setRotate(-30); // Permet de mettre le texte du Label en diagonal
+            txtBloque.setMouseTransparent(true);
+            conteneurRage.getChildren().add(txtBloque);
+        }
 
         Button btnGel = creerItem("Gel", "potion_gel.png", prixGel + "$");
         btnGel.setOnAction(e -> declencherAchat("potion_gel"));
 
-        containerPotions.getChildren().addAll(btnSoin, btnRage, btnGel);
+        StackPane conteneurGel = new StackPane();
+        conteneurGel.getChildren().add(btnGel);
+
+        if (numVagueActuelle < 7) {
+            btnGel.setDisable(true);
+            btnGel.getStyleClass().add("btn-item-bloque");
+
+            Label txtBloque = new Label("VAGUE 7");
+            txtBloque.getStyleClass().add("texte-potion-bloquee");
+            txtBloque.setRotate(-30); // Permet de mettre le texte du Label en diagonal
+            txtBloque.setMouseTransparent(true);
+            conteneurGel.getChildren().add(txtBloque);
+        }
+
+        containerPotions.getChildren().addAll(conteneurSoin, conteneurRage, conteneurGel);
 
         menuInterieur.getChildren().addAll(header, sectionTours, containerTours, sectionPotions, containerPotions);
         rootShop.getChildren().add(menuInterieur);
