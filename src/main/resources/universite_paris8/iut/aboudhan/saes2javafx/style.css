@@ -421,6 +421,12 @@
     -fx-border-color: #3ae374;
 }
 
+.btn-item-shop:disabled {
+    -fx-opacity: 0.4;
+    -fx-cursor: DEFAULT;
+    -fx-border-color: red;
+}
+
 .nom-item-shop {
     -fx-text-fill: white;
     -fx-font-size: 11px;
@@ -430,6 +436,14 @@
     -fx-text-fill: #f1c40f;
     -fx-font-size: 10px;
     -fx-font-weight: bold;
+}
+
+.texte-potion-bloquee {
+    -fx-font-family: "Impact", "Arial Black", sans-serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ff2222; 
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.9), 4, 0, 0, 0);
 }
 
 .btn-shop:hover {
@@ -519,17 +533,108 @@
     -fx-cursor: hand;
 }
 
-.btn-item-shop:disabled {
-    -fx-opacity: 0.4;
-    -fx-cursor: DEFAULT;
-    -fx-border-color: red;
+.fond-accueil {
+    -fx-background-image: url("vue/fond-accueil.png");
+    -fx-background-size: cover;
 }
 
-.texte-potion-bloquee {
-    -fx-font-family: "Impact", "Arial Black", sans-serif;
-    -fx-font-size: 16px;
+.titre-accueil {
+    -fx-text-fill: #00ffd1;
     -fx-font-weight: bold;
-    -fx-text-fill: #ff2222; /* Rouge pétant */
-    /* Petite ombre portée pour détacher le texte du fond */
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.9), 4, 0, 0, 0);
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 255, 209, 0.6), 25, 0.4, 0, 0);
+}
+
+.champ-pseudo-input {
+    -fx-background-color: #172635;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #00ffd1;
+    -fx-border-width: 2px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px;
+    -fx-font-family: 'Impact';
+    -fx-font-size: 15px;
+}
+
+.champ-pseudo-input:focused {
+    -fx-border-color: #ffffff;
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 255, 255, 0.3), 10, 0, 0, 0);
+}
+
+.fond-regles-obscur {
+    -fx-background-color: rgba(6, 12, 18, 0.85);
+}
+
+.panneau-regles-terminal {
+    -fx-background-color: #0d1b2a;
+    -fx-border-color: #e74c3c;
+    -fx-border-width: 3px;
+    -fx-border-radius: 15px;
+    -fx-background-radius: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(231, 76, 60, 0.4), 15, 0, 0, 0);
+}
+
+.titre-regles-neon {
+    -fx-text-fill: #e74c3c;
+    -fx-font-family: 'Impact';
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.texte-regles-corps {
+    -fx-text-fill: #ecf0f1;
+    -fx-font-family: 'Arial';
+    -fx-font-size: 14px;
+    -fx-line-spacing: 5px;
+}
+
+.btn-regles-action {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 25px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 0, 2);
+}
+
+.btn-lancer {
+    -fx-background-color: #19d19a;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+}
+
+.btn-lancer:hover {
+    -fx-background-color: #11ac85;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.btn-lancer:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.btn-regles {
+    -fx-background-color: #c0392b;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+}
+
+.btn-regles:hover {
+    -fx-background-color: #9c1c10;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.btn-regles:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.rayon-laser {
+    -fx-stroke: #03b1a6;
+    -fx-stroke-width: 3.0;
+    -fx-effect: dropshadow(gaussian, #08cee8, 10, 0.5, 0, 0);
 }
