@@ -22,17 +22,15 @@ public class GestionnaireTours {
 
         Tour tourPosee = trouverTourPosee(index);
 
-        // Si une tour existe sur le terrain pour cet index d'inventaire, on la range
         if (tourPosee != null) {
             env.rappelerTour(tourPosee);
-            return true; // Indique qu'une tour a été rangée
+            return true;
         }
-        // Sinon, on passe en mode placement (clic gauche pour poser)
         else {
             modePlacementTour = true;
             tourCliquee = typeTour;
             indexInventaireActu = index;
-            return false; // Indique qu'on prépare un placement
+            return false;
         }
     }
 
@@ -46,7 +44,7 @@ public class GestionnaireTours {
         int caseY = (int) (ySurTerrain / tailleTuile);
         int[][] grille = env.getGrille();
 
-        // Vérification des limites de la grille et de la disponibilité de la case (0 = herbe)
+        // Vérification des limites de la grille et de la disponibilité de la case
         if (caseY >= 0 && caseY < grille.length && caseX >= 0 && caseX < grille[0].length) {
             if (grille[caseY][caseX] == 0) {
                 return genererNouvelleTour(caseX, caseY);
@@ -55,9 +53,6 @@ public class GestionnaireTours {
         return null;
     }
 
-    /**
-     * Instancie la bonne tour, l'enregistre dans le modèle et quitte le mode placement.
-     */
     private Tour genererNouvelleTour(int caseX, int caseY) {
         Tour nouvelleTour = switch (tourCliquee) {
             case "scientifique" -> new TourScientifique(caseX, caseY);
@@ -68,10 +63,7 @@ public class GestionnaireTours {
         };
 
         if (nouvelleTour != null) {
-            // Enregistrement logique dans l'environnement
             env.enregistrerTourPosee(nouvelleTour, caseX, caseY, indexInventaireActu);
-
-            // Remise à zéro des variables d'état du placement
             modePlacementTour = false;
             tourCliquee = "";
         }
@@ -99,7 +91,6 @@ public class GestionnaireTours {
         this.indexInventaireActu = -1;
     }
 
-    // Getters pour que le contrôleur puisse savoir ce qui s'est passé en interne
     public boolean isModePlacementTour() { return modePlacementTour; }
     public int getIndexInventaireActu() { return indexInventaireActu; }
 }
