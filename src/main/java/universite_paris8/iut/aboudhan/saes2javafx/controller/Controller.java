@@ -4,8 +4,10 @@ import javafx.animation.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.TilePane;
 import java.net.URL;
@@ -14,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import universite_paris8.iut.aboudhan.saes2javafx.modele.jeu.Configuration;
@@ -34,6 +37,7 @@ import universite_paris8.iut.aboudhan.saes2javafx.vue.ecran.TerrainVue;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.ecran.VagueGagneeVue;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.ecran.VictoireVue;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.tour.InventaireVue;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.tour.ProjectileVue;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.tour.TourVue;
 
 public class Controller implements Initializable {
@@ -63,6 +67,11 @@ public class Controller implements Initializable {
     @FXML private ImageView imageInventaire1, imageInventaire2, imageInventaire3, imageInventaire4, imageInventaire5, imageInventaire6, imageInventaire7, imageInventaire8;
     @FXML private Label labelInventaire1, labelInventaire2, labelInventaire3, labelInventaire4, labelInventaire5, labelInventaire6, labelInventaire7, labelInventaire8;
 
+    @FXML private BorderPane conteneurJeu;
+    @FXML private VBox pageAccueil;
+    @FXML private TextField champPseudo;
+    @FXML private Label labelPseudoJoueur;
+
     public final Environnement env = new Environnement();
     public Inventaire inventaireModele;
     public InventaireVue inventaireVue;
@@ -74,6 +83,7 @@ public class Controller implements Initializable {
 
     private final java.util.Map<Microbe, MicrobeVue> vuesMicrobes = new java.util.HashMap<>();
     public final java.util.Map<Tour, TourVue> vuesTours = new java.util.HashMap<>();
+    private final java.util.Map<Projectile, ProjectileVue> vuesProjectiles = new java.util.HashMap<>();
 
     private AnimationTimer gameLoop;
     private Timeline timeline;
@@ -85,6 +95,7 @@ public class Controller implements Initializable {
     private ParametreVue vueParametresActive = null;
     private TutorielVue vueTutorielActive = null;
     private InfoVue vueInfoActive = null;
+    private javafx.scene.layout.StackPane calqueRegles = null;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -126,81 +137,42 @@ public class Controller implements Initializable {
             final int indexActuel = i;
             Button btn = boutonsInventaire.get(i);
             btn.setDisable(true);
-            labelsInventaire.get(i).setText("");
 
-            btn.setOnMouseClicked(event -> {
+            btn.setOnAction(event -> {
                 String typeTour = inventaireModele.getTourCase(indexActuel);
+                boolean tourRappelee = gestionnaireTours.gererClicInventaire(indexActuel, typeTour);
 
-                if (typeTour == null || typeTour.isEmpty()) {
-                    return;
-                }
+                if (tourRappelee) {
+                    // Nettoyage complet de la vue et du modèle
+                    vuesTours.entrySet().removeIf(association -> {
+                        Tour tour = association.getKey();
+                        Integer indexModele = env.getTourVersIndexInventaire().get(tour);
 
-                // CLIC DROIT -> Ranger la tour posée sur le terrain dans l'inventaire
-                if (event.getButton() == MouseButton.SECONDARY) {
+                        if (indexModele != null && indexModele == indexActuel) {
+                            // On enlève le visuel de la tour du conteneur JavaFX
+                            conteneurPrincipal.getChildren().remove(association.getValue());
 
-                    // On cherche d'abord s'il y a une tour associée à cet index dans le modèle avant qu'elle soit supprimée
-                    Tour tourAEnlever = null;
-                    for (java.util.Map.Entry<Tour, Integer> assoc : env.getTourVersIndexInventaire().entrySet()) {
-                        if (assoc.getValue() == indexActuel) {
-                            tourAEnlever = assoc.getKey();
-                            break;
+                            // On remet la tour dans l'inventaire
+                            env.rappelerTour(tour);
+
+                            // On nettoie l'association d'inventaire dans le modèle
+                            env.getTourVersIndexInventaire().remove(tour);
+
+                            return true; // Supprime l'élément de la map vuesTours
                         }
+                        return false;
+                    });
+
+                    // Remise à zéro visuelle du bouton pour qu'il soit à nouveau disponible au placement
+                    btn.getStyleClass().remove("case-tour-posee");
+                    btn.getStyleClass().remove("case-inventaire-selectionnee");
+                    btn.setDisable(false); // Reste activé pour être replacé plus tard !
+
+                } else if (gestionnaireTours.isModePlacementTour()) {
+                    for (Button b : boutonsInventaire) {
+                        b.getStyleClass().remove("case-inventaire-selectionnee");
                     }
-
-                    // On appelle le gestionnaire pour mettre à jour le modèle
-                    boolean tourRappelee = gestionnaireTours.gererClicInventaire(indexActuel, typeTour);
-
-                    if (tourRappelee || tourAEnlever != null) {
-                        final Tour tourFinale = tourAEnlever;
-
-                        // Supprime visuellement la vue de la tour du terrain JavaFX
-                        vuesTours.entrySet().removeIf(association -> {
-                            // On compare soit par l'instance de la tour trouvée, soit par l'index enregistré dans l'env
-                            if (association.getKey() == tourFinale ||
-                                    (env.getTourVersIndexInventaire().containsKey(association.getKey()) &&
-                                            env.getTourVersIndexInventaire().get(association.getKey()) == indexActuel)) {
-
-                                conteneurPrincipal.getChildren().remove(association.getValue());
-                                return true; // Supprime de la map vuesTours
-                            }
-                            return false;
-                        });
-
-                        // Nettoyage complet des styles CSS sur le bouton d'inventaire
-                        while (btn.getStyleClass().contains("case-tour-posee")) {
-                            btn.getStyleClass().remove("case-tour-posee");
-                        }
-                        while (btn.getStyleClass().contains("case-inventaire-selectionnee")) {
-                            btn.getStyleClass().remove("case-inventaire-selectionnee");
-                        }
-
-                        // Force la vue à réinstaller proprement l'image de la tour dans l'inventaire
-                        inventaireVue.installerTour(indexActuel, typeTour);
-                        btn.setDisable(false);
-
-                        // On annule tout état de placement résiduel pour repartir sur de bonnes bases
-                        gestionnaireTours.annulerPlacement();
-                    }
-                }
-
-                // CLIC GAUCHE -> Sélectionner la tour pour la poser ou la REPOSER
-                else if (event.getButton() == MouseButton.PRIMARY) {
-
-                    // On ne peut la sélectionner au clic gauche QUE si elle n'est pas déjà sur la map
-                    if (!btn.getStyleClass().contains("case-tour-posee")) {
-
-                        // Sécurité : on annule d'abord tout placement précédent
-                        gestionnaireTours.annulerPlacement();
-
-                        // On active le mode placement
-                        gestionnaireTours.gererClicInventaire(indexActuel, typeTour);
-
-                        // Gestion visuelle de la sélection (bordure jaune)
-                        for (Button b : boutonsInventaire) {
-                            b.getStyleClass().remove("case-inventaire-selectionnee");
-                        }
-                        btn.getStyleClass().add("case-inventaire-selectionnee");
-                    }
+                    btn.getStyleClass().add("case-inventaire-selectionnee");
                 }
             });
         }
@@ -245,6 +217,9 @@ public class Controller implements Initializable {
                     boutonStart.setDisable(false);
             }
         });
+
+        pageAccueil.setVisible(true);
+        conteneurJeu.setVisible(false);
     }
 
     private void verrouillerInterface(boolean verrouiller) {
@@ -323,7 +298,6 @@ public class Controller implements Initializable {
         if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
         verrouillerInterface(true);
 
-        // Récupération de la vague actuelle (ex: index 0 -> Vague 1)
         int vagueActu = env.getGestionnaireVagues().getNumVagueActu() + 1;
 
         shopActuel = new ShopVue(
@@ -393,29 +367,29 @@ public class Controller implements Initializable {
         if (vagueActuelle == null) return;
 
         timeline = new Timeline(
-            new KeyFrame(Duration.seconds(vagueActuelle.getTempsIntervalle()), event -> {
-                if (env.isMicrobesGeles()) {
-                    return;
-                }
+                new KeyFrame(Duration.seconds(vagueActuelle.getTempsIntervalle()), event -> {
+                    if (env.isMicrobesGeles()) {
+                        return;
+                    }
 
-                List<Microbe> fileAttente = vagueActuelle.getFileAttenteMicrobes();
+                    List<Microbe> fileAttente = vagueActuelle.getFileAttenteMicrobes();
 
-                if (!fileAttente.isEmpty()) {
-                    Microbe prochainMicrobe = fileAttente.remove(0);
-                    env.getMicrobesActifs().add(prochainMicrobe);
+                    if (!fileAttente.isEmpty()) {
+                        Microbe prochainMicrobe = fileAttente.remove(0);
+                        env.getMicrobesActifs().add(prochainMicrobe);
 
-                    MicrobeVue vue = new MicrobeVue(
-                            prochainMicrobe.getNomImage(),
-                            prochainMicrobe.getX(),
-                            prochainMicrobe.getY(),
-                            prochainMicrobe.getRatioPV()
-                    );
-                    vuesMicrobes.put(prochainMicrobe, vue);
-                    conteneurPrincipal.getChildren().add(vue);
-                } else {
-                    timeline.stop();
-                }
-            })
+                        MicrobeVue vue = new MicrobeVue(
+                                prochainMicrobe.getNomImage(),
+                                prochainMicrobe.getX(),
+                                prochainMicrobe.getY(),
+                                prochainMicrobe.getRatioPV()
+                        );
+                        vuesMicrobes.put(prochainMicrobe, vue);
+                        conteneurPrincipal.getChildren().add(vue);
+                    } else {
+                        timeline.stop();
+                    }
+                })
         );
         timeline.setCycleCount(Animation.INDEFINITE);
     }
@@ -450,12 +424,15 @@ public class Controller implements Initializable {
                     } else {
                         if (boutonStart != null) boutonStart.setDisable(true);
                         VagueGagneeVue ecranInterVague = new VagueGagneeVue(conteneurPrincipal, grilleJeu, numVagueTerminee,
-                            () -> {
-                                env.getGestionnaireVagues().AugmenterVague();
-                                mettreAJourLabelVague();
-                                if (boutonStart != null) boutonStart.setDisable(false);
-                            });
+                                () -> {
+                                    env.getGestionnaireVagues().AugmenterVague();
+                                    mettreAJourLabelVague();
+                                    if (boutonStart != null) boutonStart.setDisable(false);
+                                });
                         ecranInterVague.afficherSur(conteneurPrincipal);
+                        if (configJeu != null) {
+                            configJeu.changerDeMusique("musiqueInterVague.wav");
+                        }
                     }
                 }
 
@@ -470,8 +447,11 @@ public class Controller implements Initializable {
                 List<Tour> toursEnJeu = new ArrayList<>(vuesTours.keySet());
                 for (Tour tour : toursEnJeu) {
                     tour.mettreAJourRecharge(tps);
-                    tour.attaquer(env.getMicrobesActifs());
+                    tour.attaquer(env);
                 }
+
+                env.mettreAJourProjectiles();
+                rafraichirProjectiles();
 
                 boolean unMicrobeEstMort = false;
 
@@ -505,6 +485,52 @@ public class Controller implements Initializable {
                 });
             }
         };
+    }
+
+    private void rafraichirProjectiles() {
+        for (Projectile p : env.getProjectilesActifs()) {
+            if (!vuesProjectiles.containsKey(p)) {
+                double tourX = 0;
+                double tourY = 0;
+
+                List<Tour> listeTours = new ArrayList<>(vuesTours.keySet());
+                boolean trouve = false;
+
+                for (int i = 0; i < listeTours.size() && !trouve; i++) {
+                    Tour t = listeTours.get(i);
+                    if (p.getType().equals("RAYON_X") && t.getX() == p.getX() && t.getY() == p.getY()) {
+                        tourX = t.getX();
+                        tourY = t.getY();
+                        trouve = true;
+                    }
+                }
+
+                // Création et stockage de la vue graphique associée au modèle
+                ProjectileVue pVue = new ProjectileVue(p, tourX, tourY, env);
+                vuesProjectiles.put(p, pVue);
+
+                // Ajout visuel dans le conteneur principal
+                conteneurPrincipal.getChildren().add(pVue);
+            } else {
+                // Le projectile existe déjà, on met à jour son tracé ou ses coordonnées
+                vuesProjectiles.get(p).rafraichirVue(p.getX(), p.getY());
+            }
+        }
+
+        List<Projectile> projectilesAEnlever = new ArrayList<>();
+        for (Projectile p : vuesProjectiles.keySet()) {
+            ProjectileVue vue = vuesProjectiles.get(p);
+            if (vue.doitEtreRetire()) {
+                projectilesAEnlever.add(p);
+            }
+        }
+
+        for (Projectile p : projectilesAEnlever) {
+            ProjectileVue vueRetiree = vuesProjectiles.remove(p);
+            if (vueRetiree != null) {
+                conteneurPrincipal.getChildren().remove(vueRetiree);
+            }
+        }
     }
 
     private void afficherEcranDefaite() {
@@ -571,26 +597,26 @@ public class Controller implements Initializable {
         verrouillerInterface(true);
 
         vueInfoActive = new InfoVue(
-            configJeu.getTexteTutorielCourant(),
-            configJeu.estPremierePage(),
-            configJeu.estDernierePage(),
-            () -> {
-                configJeu.pagePrecedente();
-                vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
-            },
-            () -> {
-                configJeu.pageSuivante();
-                vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
-            },
-            () -> {
-                if (vueInfoActive != null) {
-                    vueInfoActive.cacher(conteneurPrincipal);
-                    configJeu.reinitialiserTutoriel();
-                    vueInfoActive = null;
-                    verrouillerInterface(false);
-                    if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                configJeu.getTexteTutorielCourant(),
+                configJeu.estPremierePage(),
+                configJeu.estDernierePage(),
+                () -> {
+                    configJeu.pagePrecedente();
+                    vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
+                },
+                () -> {
+                    configJeu.pageSuivante();
+                    vueInfoActive.rafraichirPage(configJeu.getTexteTutorielCourant(), configJeu.estPremierePage(), configJeu.estDernierePage());
+                },
+                () -> {
+                    if (vueInfoActive != null) {
+                        vueInfoActive.cacher(conteneurPrincipal);
+                        configJeu.reinitialiserTutoriel();
+                        vueInfoActive = null;
+                        verrouillerInterface(false);
+                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                    }
                 }
-            }
         );
         vueInfoActive.afficherSur(conteneurPrincipal);
     }
@@ -621,18 +647,18 @@ public class Controller implements Initializable {
         verrouillerInterface(true);
 
         vueParametresActive = new ParametreVue(
-            configJeu.getVolumeMusique(),
-            configJeu.getVolumeBruitages(),
-            nouveauVolMusique -> configJeu.setVolumeMusique(nouveauVolMusique),
-            nouveauVolBruit -> configJeu.setVolumeBruitages(nouveauVolBruit),
-            () -> {
-                if (vueParametresActive != null) {
-                    vueParametresActive.cacher(conteneurPrincipal);
-                    vueParametresActive = null;
-                    verrouillerInterface(false);
-                    if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                configJeu.getVolumeMusique(),
+                configJeu.getVolumeBruitages(),
+                nouveauVolMusique -> configJeu.setVolumeMusique(nouveauVolMusique),
+                nouveauVolBruit -> configJeu.setVolumeBruitages(nouveauVolBruit),
+                () -> {
+                    if (vueParametresActive != null) {
+                        vueParametresActive.cacher(conteneurPrincipal);
+                        vueParametresActive = null;
+                        verrouillerInterface(false);
+                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                    }
                 }
-            }
         );
         vueParametresActive.afficherSur(conteneurPrincipal);
     }
@@ -662,5 +688,77 @@ public class Controller implements Initializable {
             PotionGel gel = new PotionGel();
             gel.appliquerEffet(env);
         }
+    }
+
+    @FXML
+    private void LancerJeu() {
+        // Récupération du pseudo
+        String pseudoSaisi = champPseudo.getText().trim();
+        if (!pseudoSaisi.isEmpty())
+            labelPseudoJoueur.setText(pseudoSaisi);
+        else
+            // Nom donné par défaut si le joueur n'a pas entré de pseudo
+            labelPseudoJoueur.setText("Joueur Anonyme");
+
+        // On cache l'accueil et on affiche l'interface de jeu
+        pageAccueil.setVisible(false);
+        conteneurJeu.setVisible(true);
+    }
+
+    @FXML
+    private void AfficherReglesMenu(javafx.event.ActionEvent event) {
+        if (calqueRegles != null) {
+            return;
+        }
+
+        // Conteneur pour isoler les règles
+        calqueRegles = new javafx.scene.layout.StackPane();
+        calqueRegles.getStyleClass().add("fond-regles-obscur");
+        calqueRegles.setPrefSize(1020, 680);
+
+        // Fenêtre centrale contenant le protocole
+        javafx.scene.layout.VBox fenetreRegles = new javafx.scene.layout.VBox(25);
+        fenetreRegles.getStyleClass().add("panneau-regles-terminal");
+        fenetreRegles.setMaxSize(600, 500);
+        fenetreRegles.setAlignment(javafx.geometry.Pos.CENTER);
+        fenetreRegles.setPadding(new javafx.geometry.Insets(30));
+
+        // Titre
+        javafx.scene.control.Label titre = new javafx.scene.control.Label("PROTOCOLE SANITAIRE OBLIGATOIRE");
+        titre.getStyleClass().add("titre-regles-neon");
+
+        // Texte des règles de jeu
+        javafx.scene.control.Label contenu = new javafx.scene.control.Label(
+                "1. OBJECTIF : Protégez la zone en empêchant les microbes d'atteindre la sortie. Éliminez un maximum de microbes pour survivre un maximum de temps et gagner assez d'argent.\n\n" +
+                        "2. TOURS DE DÉFENSE : Achetez vos unités (Scientifique, Chimiste...) dans le Shop et installez-les judicieusement sur le terrain. Vous pourrez ensuite les améliorer au fur et à mesure lorsque votre budget vous le permettra !\n\n" +
+                        "3. POTIONS DE CRISE : Utilisez votre argent malignement pour utiliser les potions de Soin, de Rage ou de Gel intelligemment dans les moments les plus critiques. NE LES GASPILLEZ PAS !\n\n" +
+                        "4. PROGRESSION : Soyez toujours prêt, les microbes tenteront tout pour s'échapper et chaque vague de microbes est plus redoutable que la précédente !"
+        );
+        contenu.getStyleClass().add("texte-regles-corps");
+        contenu.setPrefWidth(540);
+        contenu.setWrapText(true);
+
+        // Bouton d'acceptation
+        javafx.scene.control.Button btnAccepter = new javafx.scene.control.Button("COMPRIS !");
+        btnAccepter.getStyleClass().add("btn-regles-action");
+
+        // Action lors du clic sur le bouton de fermeture
+        btnAccepter.setOnAction(e -> {
+            // On enlève les règles
+            javafx.scene.layout.Pane parentConteneur = (javafx.scene.layout.Pane) calqueRegles.getParent();
+            if (parentConteneur != null) {
+                parentConteneur.getChildren().remove(calqueRegles);
+            }
+            calqueRegles = null;
+        });
+
+        // Assemblage de la fenêtre de règles
+        fenetreRegles.getChildren().addAll(titre, contenu, btnAccepter);
+        calqueRegles.getChildren().add(fenetreRegles);
+
+        javafx.scene.control.Button boutonSource = (javafx.scene.control.Button) event.getSource();
+        javafx.scene.layout.Pane racineAbsolue = (javafx.scene.layout.Pane) boutonSource.getScene().getRoot();
+
+        racineAbsolue.getChildren().add(calqueRegles);
     }
 }
