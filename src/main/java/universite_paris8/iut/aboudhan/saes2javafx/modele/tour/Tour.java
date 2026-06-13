@@ -1,5 +1,6 @@
 package universite_paris8.iut.aboudhan.saes2javafx.modele.tour;
 
+import universite_paris8.iut.aboudhan.saes2javafx.modele.jeu.Environnement;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.microbe.Microbe;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public abstract class Tour {
         this.niveau = 1;
     }
 
-    public abstract void attaquer(List<Microbe> microbesActifs);
+    public abstract void attaquer(Environnement env);
 
     public double getX() { return x; }
     public double getY() { return y; }
@@ -53,10 +54,10 @@ public abstract class Tour {
     }
 
     public boolean peutAttaquer() {
-        if (this.tempsRechargeRestant <= 0) {
-            this.tempsRechargeRestant = 1.0 / (this.getVitesseTir() * this.multiplicateurVitesse);
-            return true;
-        }
-        return false;
+        return this.tempsRechargeRestant <= 0;
+    }
+
+    public void recharger() {
+        this.tempsRechargeRestant = (1.0 / (this.vitesseTir * this.multiplicateurVitesse));
     }
 }
