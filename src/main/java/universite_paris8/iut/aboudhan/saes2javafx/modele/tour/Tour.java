@@ -7,12 +7,13 @@ import java.util.List;
 
 public abstract class Tour {
     private double x, y, vitesseTir;
-    private int portee, degats, prix, niveau;
-    private String nomImage, nomArme;
+    private final int portee;
+    private int degats, prix, niveau;
+    private String nomImage;
     private double tempsRechargeRestant = 0.0;
     private double multiplicateurVitesse = 1.0;
 
-    public Tour(double x, double y, int portee, int degats, double vitesseTir, int prix, String nomImage, String nomArme) {
+    public Tour(double x, double y, int portee, int degats, double vitesseTir, int prix, String nomImage) {
         this.x = x;
         this.y = y;
         this.portee = portee;
@@ -20,7 +21,6 @@ public abstract class Tour {
         this.vitesseTir = vitesseTir;
         this.prix = prix;
         this.nomImage = nomImage;
-        this.nomArme = nomArme;
         this.niveau = 1;
     }
 
@@ -38,7 +38,6 @@ public abstract class Tour {
     public void setX(double x) { this.x = x; }
     public void setY(double y) { this.y = y; }
     public void setDegats(int degats) { this.degats = degats; }
-    public void setPortee(int portee) { this.portee = portee; }
     public void incrementerNiveau() { this.niveau++; }
 
     public void setMultiplicateurVitesse(double coeff) { this.multiplicateurVitesse = coeff; }
