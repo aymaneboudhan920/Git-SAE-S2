@@ -4,6 +4,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.microbe.GestionnaireVagues;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.microbe.Microbe;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.tour.Projectile;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.tour.Tour;
 
 import java.util.ArrayList;
@@ -21,16 +22,13 @@ public class Environnement {
     private final IntegerProperty nbPotionRage = new SimpleIntegerProperty(0);
     private final IntegerProperty nbPotionGel = new SimpleIntegerProperty(0);
 
-    public final int prix_potion_soin = 250;
-    public final int prix_potion_rage = 300;
-    public final int prix_potion_gel = 400;
-
     private final IntegerProperty argent = new SimpleIntegerProperty(4000);
     private final IntegerProperty gensInfectes = new SimpleIntegerProperty(0);
 
     private final GestionnaireVagues gestionnaireVagues;
     private final List<Microbe> microbesActifs = new ArrayList<>();
     private final List<Tour> toursPosees = new ArrayList<>();
+    private final List<Projectile> projectilesActifs = new ArrayList<>();
 
     private final Map<Tour, Integer> tourVersIndexInventaire = new HashMap<>();
     private final Map<Tour, int[]> tourVersCaseGrille = new HashMap<>();
@@ -45,6 +43,7 @@ public class Environnement {
     }
 
     public int getArgent() { return this.argent.get(); }
+    public List<Projectile> getProjectilesActifs() { return projectilesActifs; }
     public int getGensInfectes() { return this.gensInfectes.get(); }
     public void setGensInfectes(int valeur) { this.gensInfectes.set(valeur); }
 
@@ -99,26 +98,25 @@ public class Environnement {
     }
 
     public void rappelerTour(Tour tour) {
-        if (tour == null) return;
-
-        // Libérer la case sur la grille (remettre à 0 pour le sol)
         int[] caseGrille = tourVersCaseGrille.remove(tour);
         if (caseGrille != null) {
             grille[caseGrille[1]][caseGrille[0]] = 0;
-        } else {
-            // Sécurité si les coordonnées en pixels sont utilisées
-            int caseX = (int) (tour.getX() / tailleTuile);
-            int caseY = (int) (tour.getY() / tailleTuile);
-            if (caseY >= 0 && caseY < grille.length && caseX >= 0 && caseX < grille[0].length) {
-                grille[caseY][caseX] = 0;
+        }
+        toursPosees.remove(tour);
+    }
+
+    public void ajouterProjectile(Projectile p) {
+        this.projectilesActifs.add(p);
+    }
+
+    public void mettreAJourProjectiles() {
+        for (int i = projectilesActifs.size() - 1; i >= 0; i--) {
+            Projectile p = projectilesActifs.get(i);
+            p.deplacer(microbesActifs);
+            if (p.estDetruit()) {
+                projectilesActifs.remove(i);
             }
         }
-
-        // Retirer de la liste des tours qui attaquent
-        toursPosees.remove(tour);
-
-        // Supprimer l'association avec l'inventaire
-        tourVersIndexInventaire.remove(tour);
     }
 
     public boolean updateMicrobes() {
@@ -332,7 +330,7 @@ public class Environnement {
             }
         }
 
-        // Reconstruction du chemin final (A l'envers, en partant de l'arrivée vers le départ)
+        // Reconstruction du chemin final 
         List<Waypoint> listeCheminWaypoints = new ArrayList<>();
 
         if (cibleTrouvee) {
@@ -345,7 +343,7 @@ public class Environnement {
                 int positionXEnPixels = colonneCurseur * tailleTuile;
                 int positionYEnPixels = ligneCurseur * tailleTuile;
 
-                // On ajoute le point AU DÉBUT de la liste (index 0) pour remettre le chemin à l'endroit
+                // On ajoute le point au début de la liste pour remettre le chemin à l'endroit
                 listeCheminWaypoints.add(0, new Waypoint(positionXEnPixels, positionYEnPixels));
 
                 // On recule d'une case en lisant l'historique de nos parents
