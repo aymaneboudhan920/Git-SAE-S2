@@ -218,6 +218,8 @@ public class Controller implements Initializable {
             }
         });
 
+        this.potionVue = new PotionVue(grilleJeu);
+
         pageAccueil.setVisible(true);
         conteneurJeu.setVisible(false);
     }
@@ -665,28 +667,56 @@ public class Controller implements Initializable {
 
     @FXML
     private void actionUtiliserSoin() {
-        if (env.getNbPotionSoin() > 0) {
+        if (env.getNbPotionSoin() > 0 && !soinEnCooldown) {
+            soinEnCooldown = true;
             env.setNbPotionSoin(env.getNbPotionSoin() - 1);
+
             PotionSoin soin = new PotionSoin();
             soin.appliquerEffet(env);
+
+            btnPotionSoin.setDisable(true);
+            potionVue.animerJaugeActive(btnPotionSoin, 0.5, () -> {
+                btnPotionSoin.setDisable(false);
+                soinEnCooldown = false;
+            });
         }
     }
 
     @FXML
     private void actionUtiliserRage() {
-        if (env.getNbPotionRage() > 0) {
+        if (env.getNbPotionRage() > 0 && !rageEnCooldown) {
+            rageEnCooldown = true;
             env.setNbPotionRage(env.getNbPotionRage() - 1);
+
             PotionRage rage = new PotionRage();
             rage.appliquerEffet(env);
+
+            btnPotionRage.setDisable(true);
+            potionVue.animerJaugeActive(btnPotionRage, 5.0, () -> {
+                btnPotionRage.setDisable(false);
+                rageEnCooldown = false;
+            });
         }
     }
 
     @FXML
     private void actionUtiliserGel() {
-        if (env.getNbPotionGel() > 0) {
+        if (env.getNbPotionGel() > 0 && !gelEnCooldown) {
+            gelEnCooldown = true;
             env.setNbPotionGel(env.getNbPotionGel() - 1);
+
             PotionGel gel = new PotionGel();
             gel.appliquerEffet(env);
+
+            // On désactive ici ---
+            btnPotionGel.setDisable(true);
+
+            // On lance l'animation de 3s (le temps de recharge)
+            potionVue.animerJaugeActive(btnPotionGel, 3.0, () -> {
+                // actionFin s'exécute quand l'animation est finie ---
+                btnPotionGel.setDisable(false); // On réactive
+                gelEnCooldown = false; // On libère le flag technique
+            });
         }
     }
 
