@@ -27,8 +27,14 @@ public class PotionVue {
         Pane conteneurRacine = (Pane) racineGlobale;
 
         Point2D positionAbsolue = bouton.localToScene(0, 0);
-        jaugeSombre.setLayoutX(positionAbsolue.getX());
-        jaugeSombre.setLayoutY(positionAbsolue.getY());
+        if (conteneurRacine instanceof StackPane) {
+            StackPane.setAlignment(jaugeSombre, Pos.TOP_LEFT);
+            jaugeSombre.setTranslateX(positionScene.getX());
+            jaugeSombre.setTranslateY(positionScene.getY());
+        } else {
+            jaugeSombre.setLayoutX(positionScene.getX());
+            jaugeSombre.setLayoutY(positionScene.getY());
+        }
 
         conteneurRacine.getChildren().add(jaugeSombre);
 
