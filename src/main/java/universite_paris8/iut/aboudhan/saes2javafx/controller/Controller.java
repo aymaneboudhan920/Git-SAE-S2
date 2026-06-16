@@ -39,7 +39,7 @@ import universite_paris8.iut.aboudhan.saes2javafx.vue.tour.InventaireVue;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.tour.ProjectileVue;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.tour.TourVue;
 
-public class Controller implements Initializable {
+public class Controller implements Initializable, IControleurTuto {
     @FXML public Pane conteneurPrincipal;
     @FXML public TilePane grilleJeu;
     @FXML public Button boutonStart;
