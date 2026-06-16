@@ -19,6 +19,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import universite_paris8.iut.aboudhan.saes2javafx.modele.IControleurTuto;
+import universite_paris8.iut.aboudhan.saes2javafx.modele.DidactitielVisuel;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.jeu.Configuration;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.jeu.Environnement;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.microbe.Microbe;
@@ -28,10 +30,7 @@ import universite_paris8.iut.aboudhan.saes2javafx.modele.potion.PotionRage;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.potion.PotionSoin;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.tour.*;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.*;
-import universite_paris8.iut.aboudhan.saes2javafx.vue.bouton.InfoVue;
-import universite_paris8.iut.aboudhan.saes2javafx.vue.bouton.ParametreVue;
-import universite_paris8.iut.aboudhan.saes2javafx.vue.bouton.ShopVue;
-import universite_paris8.iut.aboudhan.saes2javafx.vue.bouton.TutorielVue;
+import universite_paris8.iut.aboudhan.saes2javafx.vue.bouton.*;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.ecran.DefaiteVue;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.ecran.TerrainVue;
 import universite_paris8.iut.aboudhan.saes2javafx.vue.ecran.VagueGagneeVue;
@@ -45,18 +44,18 @@ public class Controller implements Initializable {
     @FXML public TilePane grilleJeu;
     @FXML public Button boutonStart;
 
-    @FXML private Button boutonShop;
-    @FXML private Button boutonTuto;
-    @FXML private Button boutonParametres;
-    @FXML private Button boutonInfo;
+    @FXML public Button boutonShop;
+    @FXML public Button boutonTuto;
+    @FXML public Button boutonParametres;
+    @FXML public Button boutonInfo;
 
     @FXML private Label labelArgent;
     @FXML private Label labelInfectes;
     @FXML private Label labelVague;
 
-    @FXML private Button btnPotionSoin;
-    @FXML private Button btnPotionRage;
-    @FXML private Button btnPotionGel;
+    @FXML public Button btnPotionSoin;
+    @FXML public Button btnPotionRage;
+    @FXML public Button btnPotionGel;
 
     @FXML private Label labelPotionSoin;
     @FXML private Label labelPotionRage;
@@ -84,6 +83,8 @@ public class Controller implements Initializable {
     private final java.util.Map<Microbe, MicrobeVue> vuesMicrobes = new java.util.HashMap<>();
     public final java.util.Map<Tour, TourVue> vuesTours = new java.util.HashMap<>();
     private final java.util.Map<Projectile, ProjectileVue> vuesProjectiles = new java.util.HashMap<>();
+    private PotionVue potionVue;
+    private DidactitielVisuel didacticielActif;
 
     private AnimationTimer gameLoop;
     private Timeline timeline;
@@ -96,6 +97,12 @@ public class Controller implements Initializable {
     private TutorielVue vueTutorielActive = null;
     private InfoVue vueInfoActive = null;
     private javafx.scene.layout.StackPane calqueRegles = null;
+
+    private boolean soinEnCooldown = false;
+    private boolean rageEnCooldown = false;
+    private boolean gelEnCooldown = false;
+    // Variables pour gérer l'interception du premier microbe pendant le tuto
+    private boolean premierMicrobeTutoMontre = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -137,42 +144,81 @@ public class Controller implements Initializable {
             final int indexActuel = i;
             Button btn = boutonsInventaire.get(i);
             btn.setDisable(true);
+            labelsInventaire.get(i).setText("");
 
-            btn.setOnAction(event -> {
+            btn.setOnMouseClicked(event -> {
                 String typeTour = inventaireModele.getTourCase(indexActuel);
-                boolean tourRappelee = gestionnaireTours.gererClicInventaire(indexActuel, typeTour);
 
-                if (tourRappelee) {
-                    // Nettoyage complet de la vue et du modèle
-                    vuesTours.entrySet().removeIf(association -> {
-                        Tour tour = association.getKey();
-                        Integer indexModele = env.getTourVersIndexInventaire().get(tour);
+                if (typeTour == null || typeTour.isEmpty()) {
+                    return;
+                }
 
-                        if (indexModele != null && indexModele == indexActuel) {
-                            // On enlève le visuel de la tour du conteneur JavaFX
-                            conteneurPrincipal.getChildren().remove(association.getValue());
+                // CLIC DROIT -> Ranger la tour posée sur le terrain dans l'inventaire
+                if (event.getButton() == MouseButton.SECONDARY) {
 
-                            // On remet la tour dans l'inventaire
-                            env.rappelerTour(tour);
-
-                            // On nettoie l'association d'inventaire dans le modèle
-                            env.getTourVersIndexInventaire().remove(tour);
-
-                            return true; // Supprime l'élément de la map vuesTours
+                    // On cherche d'abord s'il y a une tour associée à cet index dans le modèle avant qu'elle soit supprimée
+                    Tour tourAEnlever = null;
+                    for (java.util.Map.Entry<Tour, Integer> assoc : env.getTourVersIndexInventaire().entrySet()) {
+                        if (assoc.getValue() == indexActuel) {
+                            tourAEnlever = assoc.getKey();
+                            break;
                         }
-                        return false;
-                    });
-
-                    // Remise à zéro visuelle du bouton pour qu'il soit à nouveau disponible au placement
-                    btn.getStyleClass().remove("case-tour-posee");
-                    btn.getStyleClass().remove("case-inventaire-selectionnee");
-                    btn.setDisable(false); // Reste activé pour être replacé plus tard !
-
-                } else if (gestionnaireTours.isModePlacementTour()) {
-                    for (Button b : boutonsInventaire) {
-                        b.getStyleClass().remove("case-inventaire-selectionnee");
                     }
-                    btn.getStyleClass().add("case-inventaire-selectionnee");
+
+                    // On appelle le gestionnaire pour mettre à jour le modèle
+                    boolean tourRappelee = gestionnaireTours.gererClicInventaire(indexActuel, typeTour);
+
+                    if (tourRappelee || tourAEnlever != null) {
+                        final Tour tourFinale = tourAEnlever;
+
+                        // Supprime visuellement la vue de la tour du terrain JavaFX
+                        vuesTours.entrySet().removeIf(association -> {
+                            // On compare soit par l'instance de la tour trouvée, soit par l'index enregistré dans l'env
+                            if (association.getKey() == tourFinale ||
+                                    (env.getTourVersIndexInventaire().containsKey(association.getKey()) &&
+                                            env.getTourVersIndexInventaire().get(association.getKey()) == indexActuel)) {
+
+                                conteneurPrincipal.getChildren().remove(association.getValue());
+                                return true; // Supprime de la map vuesTours
+                            }
+                            return false;
+                        });
+
+                        // Nettoyage complet des styles CSS sur le bouton d'inventaire
+                        while (btn.getStyleClass().contains("case-tour-posee")) {
+                            btn.getStyleClass().remove("case-tour-posee");
+                        }
+                        while (btn.getStyleClass().contains("case-inventaire-selectionnee")) {
+                            btn.getStyleClass().remove("case-inventaire-selectionnee");
+                        }
+
+                        // Force la vue à réinstaller proprement l'image de la tour dans l'inventaire
+                        inventaireVue.installerTour(indexActuel, typeTour);
+                        btn.setDisable(false);
+
+                        // On annule tout état de placement résiduel pour repartir sur de bonnes bases
+                        gestionnaireTours.annulerPlacement();
+                    }
+                }
+
+                // CLIC GAUCHE -> Sélectionner la tour pour la poser ou la REPOSER
+                else if (event.getButton() == MouseButton.PRIMARY) {
+
+                    // On ne peut la sélectionner au clic gauche QUE si elle n'est pas déjà sur la map
+                    if (!btn.getStyleClass().contains("case-tour-posee")) {
+
+                        // Sécurité : on annule d'abord tout placement précédent
+                        gestionnaireTours.annulerPlacement();
+
+                        // On active le mode placement
+                        gestionnaireTours.gererClicInventaire(indexActuel, typeTour);
+
+                        // Gestion visuelle de la sélection (bordure jaune)
+                        for (Button b : boutonsInventaire) {
+                            b.getStyleClass().remove("case-inventaire-selectionnee");
+                        }
+                        btn.getStyleClass().add("case-inventaire-selectionnee");
+                    }
                 }
             });
         }
@@ -193,6 +239,7 @@ public class Controller implements Initializable {
             int indexBouton = gestionnaireTours.getIndexInventaireActu();
             Tour nouvelleTour = gestionnaireTours.gererClicTerrain(xSurGrille, ySurGrille);
 
+            // Dans ton Controller.java (dans l'événement setOnMouseClicked de conteneurPrincipal) :
             if (nouvelleTour != null) {
                 int tailleTuile = env.getTailleTuile();
                 int caseX = (int) (xSurGrille / tailleTuile);
@@ -215,13 +262,13 @@ public class Controller implements Initializable {
 
                 if (!jeuDemarre && boutonStart != null)
                     boutonStart.setDisable(false);
+
+                if (this.didacticielActif != null) {
+                    this.didacticielActif.etapeDidcatitielTermine();
+                }
             }
         });
-
         this.potionVue = new PotionVue(grilleJeu);
-
-        pageAccueil.setVisible(true);
-        conteneurJeu.setVisible(false);
     }
 
     private void verrouillerInterface(boolean verrouiller) {
@@ -278,6 +325,13 @@ public class Controller implements Initializable {
                 if (timeline != null) {
                     gameLoop.start();
                     timeline.play();
+                    
+                    if (this.didacticielActif != null) {
+                        // Le jeu se fige pour laisser lire
+                        timeline.pause();
+
+                        this.didacticielActif.etapeMontrerEntree(env.creerItineraireAleatoire(), this);
+                    }
                 } else {
                     jeuDemarre = false;
                     boutonStart.setDisable(false);
@@ -299,7 +353,8 @@ public class Controller implements Initializable {
 
         if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
         verrouillerInterface(true);
-
+        
+        // Récupération de la vague actuelle
         int vagueActu = env.getGestionnaireVagues().getNumVagueActu() + 1;
 
         shopActuel = new ShopVue(
@@ -312,6 +367,9 @@ public class Controller implements Initializable {
                     }
                 },
                 (typeItem) -> {
+                    // variable pour savoir si le joueur vient d'acheter le scientifique
+                    boolean scientifiqueAchete = false;
+                    
                     if (typeItem.equals("potion_soin")) {
                         if (env.getArgent() >= PotionSoin.prixAchat) {
                             env.reduireArgent(PotionSoin.prixAchat);
@@ -342,6 +400,11 @@ public class Controller implements Initializable {
                             updateCompteurs();
                             inventaireModele.setTourCase(caseLibre, typeItem);
                             inventaireVue.installerTour(caseLibre, typeItem);
+
+                            // Si c'est le scientifique, on passe le flag à true
+                            if (typeItem.equals("scientifique")) {
+                                scientifiqueAchete = true;
+                            }
                         }
                     }
 
@@ -349,7 +412,14 @@ public class Controller implements Initializable {
                         shopActuel.cacher(conteneurPrincipal);
                         shopActuel = null;
                         verrouillerInterface(false);
-                        if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+                        if (jeuDemarre && this.didacticielActif == null) { gameLoop.start(); timeline.play(); }
+                    }
+                    if (scientifiqueAchete && this.didacticielActif != null) {
+                        javafx.application.Platform.runLater(() -> {
+                            // On récupère physiquement la première case de ton inventaire pour l'illuminer
+                            javafx.scene.Node premiereCase = boutonsInventaire.get(0);
+                            this.didacticielActif.etapeMontrerInventaire(premiereCase);
+                        });
                     }
                 },
                 vagueActu,
@@ -357,6 +427,20 @@ public class Controller implements Initializable {
                 PotionSoin.prixAchat, PotionRage.prixAchat, PotionGel.prixAchat
         );
         shopActuel.afficherSur(conteneurPrincipal);
+
+        // OUVERTURE DE LA BOUTIQUE
+        if (this.didacticielActif != null) {
+            // On laisse un mini-instant à JavaFX pour ajouter et positionner les éléments de la boutique
+            javafx.application.Platform.runLater(() -> {
+                // On cherche le bouton ou la case du Scientifique dans le conteneur principal.
+                javafx.scene.Node boutonScientifique = conteneurPrincipal.lookup(".btn-item-shop");
+
+                if (boutonScientifique != null) {
+                    // On envoie le composant graphique trouvé à l'étape 6 du tutoriel
+                    this.didacticielActif.etapeMontrerScientifiqueDansShop(boutonScientifique);
+                }
+            });
+        }
     }
 
     private void mettreAJourLabelVague() {
@@ -388,6 +472,20 @@ public class Controller implements Initializable {
                         );
                         vuesMicrobes.put(prochainMicrobe, vue);
                         conteneurPrincipal.getChildren().add(vue);
+                        
+                        if (this.didacticielActif != null && !premierMicrobeTutoMontre) {
+                            premierMicrobeTutoMontre = true;
+
+                            // On fige immédiatement le jeu à l'instant T du spawn
+                            if (timeline != null) timeline.pause();
+                            if (gameLoop != null) gameLoop.stop();
+
+                            // On laisse à JavaFX un mini instant pour placer le nœud, puis on l'illumine
+                            javafx.application.Platform.runLater(() -> {
+                                this.didacticielActif.etapeMontrerPremierMicrobe(vue);
+                            });
+                        }
+
                     } else {
                         timeline.stop();
                     }
@@ -573,6 +671,7 @@ public class Controller implements Initializable {
         jeuDemarre = false;
         boutonStart.setDisable(false);
         verrouillerInterface(false);
+        premierMicrobeTutoMontre = false;
 
         for (int i = 0; i < boutonsInventaire.size(); i++) {
             inventaireModele.setTourCase(i, null);
@@ -590,6 +689,67 @@ public class Controller implements Initializable {
 
         updateCompteurs();
         creerGameLoop();
+    }
+
+    public void relancerJeuTemporairementTuto() {
+        if (timeline != null) {
+            timeline.play();
+        }
+        if (gameLoop != null) {
+            gameLoop.start();
+        }
+    }
+
+    public void pauserJeuTuto() {
+        if (timeline != null) {
+            timeline.pause();
+        }
+        if (gameLoop != null) {
+            gameLoop.stop();
+        }
+    }
+
+    public void arreterJeuApresTuto() {
+        if (timeline != null) {
+            timeline.stop();
+        }
+        if (gameLoop != null) {
+            gameLoop.stop();
+        }
+
+        // Nettoyage des résidus graphiques des microbes et des tours créés pendant le tuto
+        for (MicrobeVue vueMicrobe : vuesMicrobes.values()) {
+            conteneurPrincipal.getChildren().remove(vueMicrobe);
+        }
+        vuesMicrobes.clear();
+
+        for (TourVue vueTour : vuesTours.values()) {
+            conteneurPrincipal.getChildren().remove(vueTour);
+        }
+        vuesTours.clear();
+
+        // Ton code d'origine pour vider l'inventaire du modèle
+        if (this.inventaireModele != null) {
+            for (int i = 0; i < inventaireModele.getCaseInventaire().length; i++) {
+                inventaireModele.getCaseInventaire()[i] = null;
+            }
+        }
+
+        // On nettoie les styles CSS de sélection et on force l'opacité à 1.0 (enlève la transparence bugguée)
+        for (Button btn : boutonsInventaire) {
+            btn.getStyleClass().removeAll("case-tour-posee", "case-inventaire-selectionnee");
+            btn.setDisable(true);
+            btn.setOpacity(1.0);
+        }
+
+        // Reset des variables d'état du contrôleur pour que le 2ème tuto reparte à zéro
+        this.jeuDemarre = false;
+        this.didacticielActif = null;
+        this.premierMicrobeTutoMontre = false;
+
+        // Tes deux appels d'origine pour remettre l'environnement et la vue à neuf
+        env.reinitialiser();
+        reinitialiserJeuVisuel();
     }
 
     @FXML
@@ -625,22 +785,33 @@ public class Controller implements Initializable {
 
     @FXML
     private void actionBoutonTuto() {
-        if (vueTutorielActive != null) return;
+        if (boutonTuto.getScene() == null) return;
 
-        if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
-        verrouillerInterface(true);
+        // Mettre le jeu en pause le temps que le joueur réponde OUI ou NON
+        if (jeuDemarre) {
+            if (gameLoop != null) gameLoop.stop();
+            if (timeline != null) timeline.pause();
+        }
 
-        vueTutorielActive = new TutorielVue(() -> {
-            if (vueTutorielActive != null) {
-                vueTutorielActive.cacher(conteneurPrincipal);
-                vueTutorielActive = null;
-                verrouillerInterface(false);
-                if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+        Pane racine = (Pane) boutonTuto.getScene().getRoot();
+        // On crée juste la popup — didacticielActif reste null jusqu'au clic OUI
+        DidactitielVisuel popup = new DidactitielVisuel(racine, this.grilleJeu);
+        popup.demarrerSiConfirme(boutonStart, this, () -> {
+            // Callback NON : reprendre la partie si elle était en cours
+            if (jeuDemarre) {
+                if (gameLoop != null) gameLoop.start();
+                if (timeline != null) timeline.play();
             }
         });
-        vueTutorielActive.afficherSur(conteneurPrincipal);
     }
 
+    // Appelée automatiquement quand on clique sur "OK" à l'étape de la sortie
+    public void declencherSpawnPremierMicrobe() {
+        if (timeline != null) {
+            timeline.play(); // Relance brièvement la timeline pour faire spawn le premier microbe
+        }
+    }
+    
     @FXML
     private void actionBoutonParametres() {
         if (vueParametresActive != null) return;
@@ -790,5 +961,100 @@ public class Controller implements Initializable {
         javafx.scene.layout.Pane racineAbsolue = (javafx.scene.layout.Pane) boutonSource.getScene().getRoot();
 
         racineAbsolue.getChildren().add(calqueRegles);
+    }
+
+    // Implémentation de IControleurTuto
+    @Override
+    public void reinitialiserPourTuto() {
+        if (timeline != null) timeline.stop();
+        if (gameLoop != null) gameLoop.stop();
+
+        for (MicrobeVue vueMicrobe : vuesMicrobes.values()) {
+            conteneurPrincipal.getChildren().remove(vueMicrobe);
+        }
+        vuesMicrobes.clear();
+
+        for (TourVue vueTour : vuesTours.values()) {
+            conteneurPrincipal.getChildren().remove(vueTour);
+        }
+        vuesTours.clear();
+
+        env.reinitialiser();
+
+        conteneurPrincipal.getChildren().clear();
+        conteneurPrincipal.getChildren().add(grilleJeu);
+        TerrainVue terrainVue = new TerrainVue(env.getGrille(), env.getTailleTuile());
+        terrainVue.dessinerTerrain(grilleJeu);
+
+        for (int i = 0; i < boutonsInventaire.size(); i++) {
+            inventaireModele.setTourCase(i, null);
+            imagesInventaire.get(i).setImage(null);
+            labelsInventaire.get(i).setText("");
+            boutonsInventaire.get(i).setDisable(true);
+            boutonsInventaire.get(i).getStyleClass().removeAll("case-tour-posee", "case-inventaire-selectionnee");
+            boutonsInventaire.get(i).setOpacity(1.0);
+        }
+
+        jeuDemarre = false;
+        premierMicrobeTutoMontre = false;
+        gestionnaireTours.reinitialiser();
+        creerGameLoop();
+        updateCompteurs();
+        mettreAJourLabelVague();
+    }
+
+    @Override
+    public void setBoutonStartDisable(boolean disable) {
+        if (boutonStart != null) boutonStart.setDisable(disable);
+    }
+
+    @Override
+    public void setBoutonShopDisable(boolean disable) {
+        if (boutonShop != null) boutonShop.setDisable(disable);
+    }
+
+    @Override
+    public javafx.scene.Node getBoutonShop() {
+        return boutonShop;
+    }
+
+    @Override
+    public void setBtnPotionSoinDisable(boolean disable) {
+        if (btnPotionSoin != null) btnPotionSoin.setDisable(disable);
+    }
+
+    @Override
+    public void setBtnPotionRageDisable(boolean disable) {
+        if (btnPotionRage != null) btnPotionRage.setDisable(disable);
+    }
+
+    @Override
+    public void setBtnPotionGelDisable(boolean disable) {
+        if (btnPotionGel != null) btnPotionGel.setDisable(disable);
+    }
+
+    @Override
+    public void setBoutonTutoDisable(boolean disable) {
+        if (boutonTuto != null) boutonTuto.setDisable(disable);
+    }
+
+    @Override
+    public void setBoutonParametresDisable(boolean disable) {
+        if (boutonParametres != null) boutonParametres.setDisable(disable);
+    }
+
+    @Override
+    public void setBoutonInfoDisable(boolean disable) {
+        if (boutonInfo != null) boutonInfo.setDisable(disable);
+    }
+
+    @Override
+    public List<Button> getBoutonsInventaire() {
+        return boutonsInventaire;
+    }
+
+    @Override
+    public void setDidacticielActif(DidactitielVisuel didacticiel) {
+        this.didacticielActif = didacticiel;
     }
 }
