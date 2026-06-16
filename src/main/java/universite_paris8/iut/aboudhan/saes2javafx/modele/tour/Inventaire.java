@@ -29,4 +29,8 @@ public class Inventaire {
         }
         return null;
     }
+
+    public String[] getCaseInventaire() {
+        return this.caseInventaire;
+    }
 }
