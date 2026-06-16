@@ -98,11 +98,23 @@ public class Environnement {
     }
 
     public void rappelerTour(Tour tour) {
+        if (tour == null) return;
         int[] caseGrille = tourVersCaseGrille.remove(tour);
         if (caseGrille != null) {
             grille[caseGrille[1]][caseGrille[0]] = 0;
         }
+        else {
+            // Sécurité si les coordonnées en pixels sont utilisées
+            int caseX = (int) (tour.getX() / tailleTuile);
+            int caseY = (int) (tour.getY() / tailleTuile);
+            if (caseY >= 0 && caseY < grille.length && caseX >= 0 && caseX < grille[0].length) {
+                grille[caseY][caseX] = 0;
+            }
+        }
+        // Retirer de la liste des tours qui attaquent
         toursPosees.remove(tour);
+        // Supprimer l'association avec l'inventaire
+        tourVersIndexInventaire.remove(tour);
     }
 
     public void ajouterProjectile(Projectile p) {
