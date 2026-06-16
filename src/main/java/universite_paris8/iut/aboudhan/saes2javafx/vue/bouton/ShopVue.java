@@ -99,13 +99,13 @@ public class ShopVue {
         StackPane conteneurRage = new StackPane();
         conteneurRage.getChildren().add(btnRage);
 
-        if (numVagueActuelle > 5) {
+        if (numVagueActuelle < 5) {
             btnRage.setDisable(true);
             btnRage.getStyleClass().add("btn-item-bloque");
 
             Label txtBloque = new Label("VAGUE 5");
             txtBloque.getStyleClass().add("texte-potion-bloquee");
-            txtBloque.setRotate(-30); // Permet de mettre le texte du Label en diagonal
+            txtBloque.setRotate(-30); 
             txtBloque.setMouseTransparent(true);
             conteneurRage.getChildren().add(txtBloque);
         }
