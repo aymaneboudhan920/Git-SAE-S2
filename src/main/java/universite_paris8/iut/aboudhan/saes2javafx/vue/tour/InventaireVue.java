@@ -42,24 +42,4 @@ public class InventaireVue {
             boutons.get(index).setDisable(false);
         }
     }
-
-    public void rafraichirInv(String[] contenuInventaire) {
-        // On boucle sur le nombre de boutons de l'interface (les 8 cases)
-        for (int i = 0; i < boutons.size(); i++) {
-
-            // Sécurité au cas où le tableau reçu soit plus petit que nos boutons
-            String typeTour = (i < contenuInventaire.length) ? contenuInventaire[i] : null;
-
-            if (typeTour == null || typeTour.isEmpty()) {
-                images.get(i).setImage(null);
-                labels.get(i).setText("");
-
-                boutons.get(i).getStyleClass().removeAll("case-tour-posee", "case-inventaire-selectionnee");
-                boutons.get(i).setDisable(true);
-            } else {
-                installerTour(i, typeTour);
-                boutons.get(i).setDisable(false);
-            }
-        }
-    }
 }
