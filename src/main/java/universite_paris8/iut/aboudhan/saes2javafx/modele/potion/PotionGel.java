@@ -7,7 +7,7 @@ import universite_paris8.iut.aboudhan.saes2javafx.modele.microbe.Microbe;
 
 public class PotionGel {
 
-    public static final int prixAchat = 150;
+    public static final int prixAchat = 75;
 
     public void appliquerEffet(Environnement env) {
         env.setMicrobesGeles(true);
