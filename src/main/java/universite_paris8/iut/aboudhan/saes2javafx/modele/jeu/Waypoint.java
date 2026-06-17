@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Représente un point de passage sur le chemin des virus.
+ * Chaque point connaît sa position (X, Y) et la liste des points suivants.
+ * Si le chemin se sépare en plusieurs branches, la classe choisit au hasard
+ * la prochaine direction que va prendre le virus.
+ */
+
 public class Waypoint {
     private double x, y;
     private List<Waypoint> suivants;
