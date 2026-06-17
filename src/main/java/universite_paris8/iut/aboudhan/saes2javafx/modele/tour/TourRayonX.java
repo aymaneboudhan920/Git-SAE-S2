@@ -8,7 +8,7 @@ import java.util.List;
 public class TourRayonX extends Tour {
     private final double degatsMin = 0.5;
     private final double degatsMax = 40.0;
-    public static int prixAchat = 200;
+    public static int prixAchat = 100;
 
     private Microbe cibleActuelle = null;
     private Projectile rayonActuel = null;
