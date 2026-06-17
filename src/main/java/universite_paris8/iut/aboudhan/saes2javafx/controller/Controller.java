@@ -215,8 +215,24 @@ public class Controller implements Initializable {
                         double caseCenterX = coordsConteneur.getX() + (btn.getWidth() / 2);
                         double posY = coordsConteneur.getY();
 
-                        this.panneauActionTour.setLayoutX(caseCenterX - (this.panneauActionTour.getBoundsInLocal().getWidth() / 2));
-                        this.panneauActionTour.setLayoutY(posY - this.panneauActionTour.getHeight() - 10);
+                        this.panneauActionTour.actualiser(this.tourEnInspection, estUneTourExistante, env.getArgent());
+                        this.panneauActionTour.applyCss();
+                        this.panneauActionTour.layout();
+
+                        double largeurInitiale = this.panneauActionTour.getBoundsInLocal().getWidth();
+                        double hauteurInitiale = this.panneauActionTour.getHeight();
+
+                        double posXInitiale = caseCenterX - (largeurInitiale / 2);
+                        double posYInitiale = posY - hauteurInitiale - 10;
+
+                        double largeurMaxConteneur = conteneurPrincipal.getWidth();
+                        if (posXInitiale + largeurInitiale > largeurMaxConteneur - env.getTailleTuile()) {
+                            posXInitiale = largeurMaxConteneur - largeurInitiale - env.getTailleTuile();
+                        }
+
+                        this.panneauActionTour.setLayoutX(posXInitiale);
+                        this.panneauActionTour.setLayoutY(posYInitiale);
+
                         this.panneauActionTour.widthProperty().addListener((obs, oldWidth, newWidth) -> {
                             double largeurReelle = newWidth.doubleValue();
                             double hauteurReelle = this.panneauActionTour.getHeight();
@@ -224,16 +240,16 @@ public class Controller implements Initializable {
                             double posX = caseCenterX - (largeurReelle / 2);
                             double correctedPosY = posY - hauteurReelle - 10;
 
-                            double largeurMaxConteneur = conteneurPrincipal.getWidth();
                             if (posX + largeurReelle > largeurMaxConteneur - env.getTailleTuile()) {
                                 posX = largeurMaxConteneur - largeurReelle - env.getTailleTuile();
+                            }
+                            if (posX < env.getTailleTuile()) {
+                                posX = env.getTailleTuile();
                             }
 
                             this.panneauActionTour.setLayoutX(posX);
                             this.panneauActionTour.setLayoutY(correctedPosY);
                         });
-
-                        this.panneauActionTour.actualiser(this.tourEnInspection, estUneTourExistante, env.getArgent());
 
                         for (Button b : boutonsInventaire) {
                             b.getStyleClass().remove("case-inventaire-selectionnee");
