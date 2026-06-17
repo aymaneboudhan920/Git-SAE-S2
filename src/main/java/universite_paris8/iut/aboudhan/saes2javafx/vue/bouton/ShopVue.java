@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 public class ShopVue {
 
-    private StackPane rootShop;
+    private StackPane panneauShop;
     private VBox menuInterieur;
     private Runnable actionFermer;
     private Consumer<String> actionClicItem;
@@ -25,9 +25,9 @@ public class ShopVue {
     }
 
     private void creerInterface(int numVagueActuelle, int argentActuel, int prixScientifique, int prixChimiste, int prixScanner, int prixRayonX, int prixSoin, int prixRage, int prixGel) {
-        rootShop = new StackPane();
-        rootShop.setPrefSize(1020, 680);
-        rootShop.getStyleClass().add("fond-flou-shop");
+        panneauShop = new StackPane();
+        panneauShop.setPrefSize(1020, 680);
+        panneauShop.getStyleClass().add("fond-flou-shop");
 
         menuInterieur = new VBox(20);
         menuInterieur.setAlignment(Pos.CENTER);
@@ -94,7 +94,7 @@ public class ShopVue {
         containerPotions.getChildren().addAll(conteneurSoin, conteneurRage, conteneurGel);
 
         menuInterieur.getChildren().addAll(header, sectionTours, containerTours, sectionPotions, containerPotions);
-        rootShop.getChildren().add(menuInterieur);
+        panneauShop.getChildren().add(menuInterieur);
     }
 
     private StackPane configurerBlocage(Button bouton, String typeItem, int vagueActuelle, int vagueRequise, int argentActuel, int prixItem) {
@@ -186,8 +186,8 @@ public class ShopVue {
         if (!parent.getChildren().isEmpty()) {
             parent.getChildren().get(0).setEffect(new javafx.scene.effect.BoxBlur(5, 5, 3));
         }
-        if (!parent.getChildren().contains(rootShop)) {
-            parent.getChildren().add(rootShop);
+        if (!parent.getChildren().contains(panneauShop)) {
+            parent.getChildren().add(panneauShop);
         }
     }
 
@@ -195,6 +195,6 @@ public class ShopVue {
         if (!parent.getChildren().isEmpty()) {
             parent.getChildren().get(0).setEffect(null);
         }
-        parent.getChildren().remove(rootShop);
+        parent.getChildren().remove(panneauShop);
     }
 }
