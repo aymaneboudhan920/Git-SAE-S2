@@ -174,6 +174,10 @@
     -fx-border-color: #00ffe1;
 }
 
+.btn-nomoney-shop:disabled {
+    -fx-border-color: #8400ff;
+}
+
 .nom-item-shop {
     -fx-text-fill: white;
     -fx-font-size: 11px;
@@ -428,7 +432,6 @@
     -fx-background-color: #2980b9;
 }
 
-/* Le panneau de la question Oui/Non au centre de l'écran */
 .tuto-popup-question {
     -fx-background-color: #1a1a2e;
     -fx-border-color: #3498db;
@@ -438,10 +441,9 @@
     -fx-padding: 25px;
     -fx-alignment: center;
     -fx-spacing: 20px;
-    -fx-effect: dropshadow(three-pass-box, rgba(52, 152, 219, 0.4), 20, 0, 0, 0); /* Lueur bleue */
+    -fx-effect: dropshadow(three-pass-box, rgba(52, 152, 219, 0.4), 20, 0, 0, 0);
 }
 
-/* Le texte de la question */
 .tuto-titre-question {
     -fx-text-fill: #ffffff;
     -fx-font-family: 'Impact', 'Arial Black', sans-serif;
@@ -449,13 +451,11 @@
     -fx-alignment: center;
 }
 
-/* Conteneur des boutons Oui/Non */
 .tuto-box-boutons {
     -fx-spacing: 25px;
     -fx-alignment: center;
 }
 
-/* Bouton OUI (Couleur verte/style validation) */
 .btn-tuto-oui {
     -fx-background-color: #2ecc71;
     -fx-text-fill: #ffffff;
@@ -467,11 +467,10 @@
 }
 .btn-tuto-oui:hover {
     -fx-background-color: #27ae60;
-    -fx-scale-x: 1.05; /* Petit effet de zoom au survol */
+    -fx-scale-x: 1.05; 
     -fx-scale-y: 1.05;
 }
 
-/* Bouton NON (Couleur rouge/style annulation) */
 .btn-tuto-non {
     -fx-background-color: #e74c3c;
     -fx-text-fill: #ffffff;
@@ -487,7 +486,6 @@
     -fx-scale-y: 1.05;
 }
 
-/* La bulle d'aide (qui pointe le bouton Start, l'entrée et la sortie) */
 .tuto-bulle {
     -fx-background-color: #1a1a2e;
     -fx-padding: 20px;
@@ -582,7 +580,6 @@
     -fx-background-color: #ff5e57;
 }
 
-/* Bouton de fermeture X */
 .btn-action-fermer {
     -fx-background-color: transparent;
     -fx-text-fill: #ff3f34;
@@ -595,7 +592,6 @@
     -fx-text-fill: #ff5e57;
 }
 
-/* Bouton Ranger dans l'inventaire */
 .btn-action-ranger {
     -fx-background-color: #ffa502;
     -fx-text-fill: white;
