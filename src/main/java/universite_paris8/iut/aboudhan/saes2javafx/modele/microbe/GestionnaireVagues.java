@@ -36,21 +36,21 @@ public class GestionnaireVagues {
     }
 
     public void initialiserVagues(Environnement env) {
-
-        listeVagues.add(creerVague(env, 1.0, 10, 0, 1));
-        listeVagues.add(creerVague(env, 1.5, 15, 0, 2));
-        listeVagues.add(creerVague(env, 1.5, 15, 0, 3));
-        listeVagues.add(creerVague(env, 1.5, 15, 1, 4));
-        listeVagues.add(creerVague(env, 1.0, 20, 1, 5));
-        listeVagues.add(creerVague(env, 1.0, 20, 2, 6));
-        listeVagues.add(creerVague(env, 0.5, 25, 2, 7));
-        listeVagues.add(creerVague(env, 0.5, 25, 3, 8));
-        listeVagues.add(creerVague(env, 0.5, 25, 4, 9));
-        listeVagues.add(creerVague(env, 1.0, 30, 4, 10));
+        listeVagues.add(creerVague(env, 1.0, 10, 0, 1, 1));
+        listeVagues.add(creerVague(env, 1.5, 15, 0, 2, 2));
+        listeVagues.add(creerVague(env, 1.5, 15, 0, 3, 3));
+        listeVagues.add(creerVague(env, 1.5, 15, 1, 4, 4));
+        listeVagues.add(creerVague(env, 1.0, 20, 1, 5, 5));
+        listeVagues.add(creerVague(env, 1.0, 20, 2, 6, 6));
+        listeVagues.add(creerVague(env, 0.5, 25, 2, 7, 7));
+        listeVagues.add(creerVague(env, 0.5, 25, 3, 8, 8));
+        listeVagues.add(creerVague(env, 0.5, 25, 4, 9, 9));
+        listeVagues.add(creerVague(env, 1.0, 30, 4, 10, 10));
     }
 
-    private Vague creerVague(Environnement env, double intervalle, int nbMicrobes, int indexMin, int indexMax) {
-        Vague vague = new Vague(intervalle, nbMicrobes);
+    private Vague creerVague(Environnement env, double intervalle, int nbMicrobes, int indexMin, int indexMax, int numVague) {
+        int bonusArgent = 12 * numVague;
+        Vague vague = new Vague(intervalle, bonusArgent);
 
         for (int i = 0; i < nbMicrobes; i++) {
             Microbe m = listeMicrobes.get((int)(Math.random() * (indexMax-indexMin + 1)) + indexMin);
