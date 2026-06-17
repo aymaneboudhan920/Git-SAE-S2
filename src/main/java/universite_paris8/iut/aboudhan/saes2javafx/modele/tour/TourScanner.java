@@ -6,7 +6,7 @@ import universite_paris8.iut.aboudhan.saes2javafx.modele.microbe.Microbe;
 import java.util.List;
 
 public class TourScanner extends Tour {
-    public static int prixAchat = 150;
+    public static int prixAchat = 75;
     private double rayonAnimationActuel = 0;
     private final double vitesseExtension;
 
