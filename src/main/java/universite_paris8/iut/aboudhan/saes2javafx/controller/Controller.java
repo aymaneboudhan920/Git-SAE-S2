@@ -233,7 +233,7 @@ public class Controller implements Initializable {
                             this.panneauActionTour.setLayoutY(correctedPosY);
                         });
 
-                        this.panneauActionTour.actualiser(this.tourEnInspection, estUneTourExistante);
+                        this.panneauActionTour.actualiser(this.tourEnInspection, estUneTourExistante, env.getArgent());
 
                         for (Button b : boutonsInventaire) {
                             b.getStyleClass().remove("case-inventaire-selectionnee");
@@ -955,7 +955,7 @@ public class Controller implements Initializable {
                     labelsInventaire.get(indexTourInspectee).setText("LEVEL " + tourEnInspection.getNiveau());
                 }
                 boolean estPosee = vuesTours.containsKey(this.tourEnInspection);
-                this.panneauActionTour.actualiser(this.tourEnInspection, estPosee);
+                this.panneauActionTour.actualiser(this.tourEnInspection, estPosee, env.getArgent());
             }
         }
     }
