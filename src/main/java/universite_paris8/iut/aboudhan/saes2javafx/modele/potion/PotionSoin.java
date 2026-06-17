@@ -3,7 +3,7 @@ package universite_paris8.iut.aboudhan.saes2javafx.modele.potion;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.jeu.Environnement;
 
 public class PotionSoin extends Potion {
-    public static int prixAchat = 300;
+    public static int prixAchat = 150;
     private final int nbSoignee = 10;
 
     public PotionSoin() {
