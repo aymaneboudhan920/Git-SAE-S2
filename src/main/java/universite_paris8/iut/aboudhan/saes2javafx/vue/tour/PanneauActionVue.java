@@ -5,7 +5,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.tour.Tour;
 
@@ -57,7 +56,7 @@ public class PanneauActionVue extends VBox {
         this.getChildren().addAll(ligneEntete, conteneurBoutons);
     }
 
-    public void actualiser(Tour tour, boolean estPosee) {
+    public void actualiser(Tour tour, boolean estPosee, int argentActuel) {
         this.setVisible(true);
         String nomTour = tour.getClass().getSimpleName().replace("Tour", "");
         nomTour = nomTour.toUpperCase();
@@ -68,8 +67,15 @@ public class PanneauActionVue extends VBox {
             labelInfo.setText(nomTour + " - LEVEL " + tour.getNiveau());
 
         if (tour.peutEtreAmelioree()) {
-            btnAmeliorer.setText("Améliorer (-" + tour.calculerPrixAmelioration() + "$)");
-            btnAmeliorer.setDisable(false);
+            int prixAmelioration = tour.calculerPrixAmelioration();
+            btnAmeliorer.setText("Améliorer (-" + prixAmelioration + "$)");
+
+            // Le bouton est désactivé si le joueur n'a pas assez d'argent
+            if (argentActuel < prixAmelioration) {
+                btnAmeliorer.setDisable(true);
+            } else {
+                btnAmeliorer.setDisable(false);
+            }
         } else {
             btnAmeliorer.setText("Niveau MAX (5)");
             btnAmeliorer.setDisable(true);
