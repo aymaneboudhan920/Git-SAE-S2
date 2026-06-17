@@ -22,17 +22,17 @@ public class GestionnaireVagues {
     }
 
     public void creerListeMicrobes() {
-        listeMicrobes.add(new Microbe(0.8, 30, 2, 1, "RHINOVIRUS", null));
-        listeMicrobes.add(new Microbe(1.0, 40, 3, 1, "NOROVIRUS", null));
-        listeMicrobes.add(new Microbe(0.9, 60, 5, 2, "STREPTOCOQUE", null));
-        listeMicrobes.add(new Microbe(0.7, 10, 10, 3, "INFLUENZA", null));
-        listeMicrobes.add(new Microbe(1.0, 120, 15, 5, "VARICELLE", null));
-        listeMicrobes.add(new Microbe(0.8, 200, 20, 8, "COVID", null));
-        listeMicrobes.add(new Microbe(0.6, 250, 30, 10, "VIH", null));
-        listeMicrobes.add(new Microbe(0.5, 600, 40, 12, "TUBERCULOSE", null));
-        listeMicrobes.add(new Microbe(0.8, 450, 50, 20, "PESTE", null));
-        listeMicrobes.add(new Microbe(1.0, 300, 70, 15, "RAGE", null));
-        listeMicrobes.add(new Microbe(0.3, 2000, 100, 50, "VARIOLE", null));
+        listeMicrobes.add(new Microbe(0.8, 45, 2, 1, "RHINOVIRUS", null));
+        listeMicrobes.add(new Microbe(1.0, 60, 3, 1, "NOROVIRUS", null));
+        listeMicrobes.add(new Microbe(0.9, 90, 5, 2, "STREPTOCOQUE", null));
+        listeMicrobes.add(new Microbe(0.7, 20, 10, 3, "INFLUENZA", null));
+        listeMicrobes.add(new Microbe(1.0, 180, 15, 5, "VARICELLE", null));
+        listeMicrobes.add(new Microbe(0.8, 300, 20, 8, "COVID", null));
+        listeMicrobes.add(new Microbe(0.6, 375, 30, 10, "VIH", null));
+        listeMicrobes.add(new Microbe(0.5, 900, 40, 12, "TUBERCULOSE", null));
+        listeMicrobes.add(new Microbe(0.8, 675, 50, 20, "PESTE", null));
+        listeMicrobes.add(new Microbe(1.0, 450, 70, 15, "RAGE", null));
+        listeMicrobes.add(new Microbe(0.3, 3000, 100, 50, "VARIOLE", null));
     }
 
     public void initialiserVagues(Environnement env) {
