@@ -6,7 +6,7 @@ import universite_paris8.iut.aboudhan.saes2javafx.modele.jeu.Environnement;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.tour.Tour;
 
 public class PotionRage extends Potion {
-    public static int prixAchat = 250;
+    public static int prixAchat = 125;
 
     public PotionRage() {
         super("Potion de Rage", prixAchat);
