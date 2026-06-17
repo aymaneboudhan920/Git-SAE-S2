@@ -121,7 +121,7 @@ public class ShopVue {
         }
         else if (argentActuel < prixItem) {
             bouton.setDisable(true);
-            bouton.getStyleClass().addAll("btn-item-shop", cssBoutonSpecifique);
+            bouton.getStyleClass().addAll("btn-item-shop", "btn-nomoney-shop");
 
             Label txtNoMoney = new Label("NO CASH");
             txtNoMoney.getStyleClass().addAll("texte-bloquee", "texte-nomoney-bloquee");
