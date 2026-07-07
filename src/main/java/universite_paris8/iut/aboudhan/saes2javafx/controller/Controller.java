@@ -44,8 +44,8 @@ import universite_paris8.iut.aboudhan.saes2javafx.vue.tour.TourVue;
 public class Controller implements Initializable {
     @FXML public Pane conteneurPrincipal;
     @FXML public TilePane grilleJeu;
-    @FXML public Button boutonStart;
 
+    @FXML public Button boutonStart;
     @FXML private Button boutonShop;
     @FXML private Button boutonTuto;
     @FXML private Button boutonParametres;
@@ -91,6 +91,7 @@ public class Controller implements Initializable {
     private AnimationTimer gameLoop;
     private Timeline timeline;
     private ShopVue shopActuel = null;
+    private CatalogueVue catalogueActif = null;
 
     private GestionnaireTours gestionnaireTours;
     private GestionnaireEffets gestionnaireEffets;
@@ -121,7 +122,7 @@ public class Controller implements Initializable {
         // Préparer les vagues du jeu
         env.getGestionnaireVagues().initialiserVagues(env);
 
-        // Bindings pour l'argent et le nb d'infections
+        // Bindings pour l'argent et le nb d'infections et le nb de potions en possession
         labelArgent.textProperty().bind(env.argentProperty().asString());
         labelInfectes.textProperty().bind(env.gensInfectesProperty().asString());
         labelPotionSoin.textProperty().bind(env.nbPotionSoinProperty().asString());
@@ -215,8 +216,24 @@ public class Controller implements Initializable {
                         double caseCenterX = coordsConteneur.getX() + (btn.getWidth() / 2);
                         double posY = coordsConteneur.getY();
 
-                        this.panneauActionTour.setLayoutX(caseCenterX - (this.panneauActionTour.getBoundsInLocal().getWidth() / 2));
-                        this.panneauActionTour.setLayoutY(posY - this.panneauActionTour.getHeight() - 10);
+                        this.panneauActionTour.actualiser(this.tourEnInspection, estUneTourExistante, env.getArgent());
+                        this.panneauActionTour.applyCss();
+                        this.panneauActionTour.layout();
+
+                        double largeurInitiale = this.panneauActionTour.getBoundsInLocal().getWidth();
+                        double hauteurInitiale = this.panneauActionTour.getHeight();
+
+                        double posXInitiale = caseCenterX - (largeurInitiale / 2);
+                        double posYInitiale = posY - hauteurInitiale - 10;
+
+                        double largeurMaxConteneur = conteneurPrincipal.getWidth();
+                        if (posXInitiale + largeurInitiale > largeurMaxConteneur - env.getTailleTuile()) {
+                            posXInitiale = largeurMaxConteneur - largeurInitiale - env.getTailleTuile();
+                        }
+
+                        this.panneauActionTour.setLayoutX(posXInitiale);
+                        this.panneauActionTour.setLayoutY(posYInitiale);
+
                         this.panneauActionTour.widthProperty().addListener((obs, oldWidth, newWidth) -> {
                             double largeurReelle = newWidth.doubleValue();
                             double hauteurReelle = this.panneauActionTour.getHeight();
@@ -224,16 +241,16 @@ public class Controller implements Initializable {
                             double posX = caseCenterX - (largeurReelle / 2);
                             double correctedPosY = posY - hauteurReelle - 10;
 
-                            double largeurMaxConteneur = conteneurPrincipal.getWidth();
                             if (posX + largeurReelle > largeurMaxConteneur - env.getTailleTuile()) {
                                 posX = largeurMaxConteneur - largeurReelle - env.getTailleTuile();
+                            }
+                            if (posX < env.getTailleTuile()) {
+                                posX = env.getTailleTuile();
                             }
 
                             this.panneauActionTour.setLayoutX(posX);
                             this.panneauActionTour.setLayoutY(correctedPosY);
                         });
-
-                        this.panneauActionTour.actualiser(this.tourEnInspection, estUneTourExistante);
 
                         for (Button b : boutonsInventaire) {
                             b.getStyleClass().remove("case-inventaire-selectionnee");
@@ -378,8 +395,6 @@ public class Controller implements Initializable {
                     }
                 },
                 (typeItem) -> {
-
-                    boolean scientifiqueAchete = false;
                     if (typeItem.equals("potion_soin")) {
                         if (env.getArgent() >= PotionSoin.prixAchat) {
                             env.reduireArgent(PotionSoin.prixAchat);
@@ -420,9 +435,6 @@ public class Controller implements Initializable {
                             if (nouvelleTourAchetee != null) {
                                 env.getTourVersIndexInventaire().put(nouvelleTourAchetee, caseLibre);
                             }
-                            if (typeItem.equals("scientifique")) {
-                                scientifiqueAchete = true;
-                            }
                         }
                     }
 
@@ -433,7 +445,7 @@ public class Controller implements Initializable {
                         if (jeuDemarre) { gameLoop.start(); timeline.play(); }
                     }
                 },
-                vagueActu,
+                vagueActu, env.getArgent(),
                 TourScientifique.prixAchat, TourChimiste.prixAchat, TourScanner.prixAchat, TourRayonX.prixAchat,
                 PotionSoin.prixAchat, PotionRage.prixAchat, PotionGel.prixAchat
         );
@@ -534,12 +546,26 @@ public class Controller implements Initializable {
                     updateCompteurs();
                 }
 
-                double tps = 0.012;
+                double tps = 0.016;
 
                 List<Tour> toursEnJeu = new ArrayList<>(vuesTours.keySet());
                 for (Tour tour : toursEnJeu) {
                     tour.mettreAJourRecharge(tps);
-                    tour.attaquer(env);
+                    if (tour instanceof TourRayonX) {
+                        TourRayonX tourRayonX = (TourRayonX) tour;
+                        if (tour.estEtourdie()) {
+                            if (tourRayonX.getRayonActuel() != null) {
+                                tourRayonX.getRayonActuel().setDetruit(true);
+                            }
+                        } else {
+                            if (tourRayonX.getRayonActuel() != null && tourRayonX.getCibleActuelle() != null) {
+                                tourRayonX.getRayonActuel().setDetruit(false);
+                            }
+                        }
+                    }
+                    if (tour.peutAttaquer()) {
+                        tour.attaquer(env);
+                    }
                     if (tour instanceof TourScanner) {
                         TourVue vueTour = vuesTours.get(tour);
                         if (vueTour != null) {
@@ -659,6 +685,13 @@ public class Controller implements Initializable {
                 conteneurPrincipal.getChildren().remove(vueRetiree);
             }
         }
+    }
+
+    public void spawnMicrobe(Microbe m){
+        MicrobeVue vue2 = new MicrobeVue(m.getType(), m.getX(), m.getY(), m.getRatioPV());
+        vue2.getBarreDeVie().progressProperty().bind( m.pvProperty().divide(m.pvMax));
+        vuesMicrobes.put(m, vue2);
+        conteneurPrincipal.getChildren().add(vue2);
     }
 
     private void afficherEcranDefaite() {
@@ -819,6 +852,7 @@ public class Controller implements Initializable {
 
             PotionSoin soin = new PotionSoin();
             soin.appliquerEffet(env);
+            updateCompteurs();
 
             btnPotionSoin.setDisable(true);
             potionVue.animerJaugeActive(btnPotionSoin, 0.5, () -> {
@@ -935,6 +969,34 @@ public class Controller implements Initializable {
         racineAbsolue.getChildren().add(calqueRegles);
     }
 
+    @FXML
+    private void CatalogueAction() {
+        if (catalogueActif != null) {
+            catalogueActif.cacher(conteneurPrincipal);
+            if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+            verrouillerInterface(false);
+            catalogueActif = null;
+            return;
+        }
+
+        // Mettre le jeu en pause pendant la lecture du catalogue
+        if (jeuDemarre) { gameLoop.stop(); timeline.pause(); }
+        verrouillerInterface(true);
+
+        // Instance de notre nouvelle vue à onglets
+        catalogueActif = new CatalogueVue(() -> {
+            if (catalogueActif != null) {
+                catalogueActif.cacher(conteneurPrincipal);
+                catalogueActif = null;
+                verrouillerInterface(false);
+                if (jeuDemarre) { gameLoop.start(); timeline.play(); }
+            }
+        });
+
+
+        catalogueActif.afficherSur(conteneurPrincipal);
+    }
+
     private void gererAmelioration() {
         if (this.tourEnInspection != null) {
             boolean succes = env.ameliorerTour(this.tourEnInspection);
@@ -945,7 +1007,7 @@ public class Controller implements Initializable {
                     labelsInventaire.get(indexTourInspectee).setText("LEVEL " + tourEnInspection.getNiveau());
                 }
                 boolean estPosee = vuesTours.containsKey(this.tourEnInspection);
-                this.panneauActionTour.actualiser(this.tourEnInspection, estPosee);
+                this.panneauActionTour.actualiser(this.tourEnInspection, estPosee, env.getArgent());
             }
         }
     }
@@ -996,4 +1058,6 @@ public class Controller implements Initializable {
             b.getStyleClass().remove("case-inventaire-selectionnee");
         }
     }
+
+
 }
