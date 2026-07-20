@@ -54,7 +54,7 @@ public class Projectile {
                         double distMicrobe = Math.sqrt(dX * dX + dY * dY);
 
                         // Si le microbe est à portée de la détonation de la tour chimiste
-                        if (distMicrobe <= TourChimiste.portee) {
+                        if (distMicrobe <= TourChimiste.PORTEE) {
                             m.perdreVie(degats, tourSource);
                         }
                     }
