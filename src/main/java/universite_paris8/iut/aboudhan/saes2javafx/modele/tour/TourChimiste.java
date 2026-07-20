@@ -6,12 +6,11 @@ import universite_paris8.iut.aboudhan.saes2javafx.modele.microbe.Microbe;
 import java.util.List;
 
 public class TourChimiste extends Tour {
-    public static int prixAchat = 50;
-    public static int portee = 102;
-
+    public static final int prixAchat = 50;
+    public static final int PORTEE = 102;
 
     public TourChimiste(double x, double y) {
-        super(x, y, portee, 15, 0.33, prixAchat,
+        super(x, y, PORTEE, 15, 0.33, prixAchat,
                 "/universite_paris8/iut/aboudhan/saes2javafx/vue/tour_chimiste.png");
     }
 
@@ -22,7 +21,7 @@ public class TourChimiste extends Tour {
 
         for (int i = 0; i < microbesActifs.size() && cible == null; i++) {
             Microbe m = microbesActifs.get(i);
-            if (!m.estMort() && !m.getType().equals("INFLUENZA")) {
+            if (!m.estMort() && !"INFLUENZA".equals(m.getType())) {
                 double diffX = m.getX() - this.getX();
                 double diffY = m.getY() - this.getY();
                 double distance = Math.sqrt(diffX * diffX + diffY * diffY);
