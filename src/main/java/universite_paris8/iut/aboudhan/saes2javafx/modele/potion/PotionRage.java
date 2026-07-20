@@ -6,7 +6,7 @@ import universite_paris8.iut.aboudhan.saes2javafx.modele.jeu.Environnement;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.tour.Tour;
 
 public class PotionRage extends Potion {
-    public static int prixAchat = 125;
+    public static final int prixAchat = 125;
 
     public PotionRage() {
         super("Potion de Rage", prixAchat);
@@ -18,6 +18,7 @@ public class PotionRage extends Potion {
         for (Tour tour : env.getToursPosees()) {
             tour.setMultiplicateurVitesse(2.0);
         }
+
         // On crée un chrono de 5 secondes
         PauseTransition dureeEffet = new PauseTransition(Duration.seconds(5));
 
