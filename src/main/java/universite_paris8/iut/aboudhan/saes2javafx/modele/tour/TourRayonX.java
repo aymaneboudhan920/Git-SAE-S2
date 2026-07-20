@@ -6,14 +6,14 @@ import universite_paris8.iut.aboudhan.saes2javafx.modele.microbe.Microbe;
 import java.util.List;
 
 public class TourRayonX extends Tour {
-    private final double degatsMin = 0.5;
-    private final double degatsMax = 40.0;
-    public static int prixAchat = 100;
+    public static final int prixAchat = 100;
+    private static final double DEGATS_MIN = 0.5;
+    private static final double DEGATS_MAX = 40.0;
+    private static final double PAS_AUGMENTATION = 1.3;
 
     private Microbe cibleActuelle = null;
     private Projectile rayonActuel = null;
-    private double degatsActuels = degatsMin;
-    private final double pasAugmentation = 1.3;
+    private double degatsActuels = DEGATS_MIN;
 
     public TourRayonX(double x, double y) {
         super(x, y, 102, 2, 10, prixAchat,
@@ -31,31 +31,30 @@ public class TourRayonX extends Tour {
                     rayonActuel = null;
                 }
                 cibleActuelle = null;
-                degatsActuels = degatsMin;
+                degatsActuels = DEGATS_MIN;
             }
         }
 
         if (cibleActuelle == null) {
             for (int i = 0; i < microbesActifs.size() && cibleActuelle == null; i++) {
                 Microbe m = microbesActifs.get(i);
-                if (!m.estMort() && estAPortee(m) && !m.getType().equals("INFLUENZA")) {
+                if (!m.estMort() && estAPortee(m) && !"INFLUENZA".equals(m.getType())) {
                     cibleActuelle = m;
-                    degatsActuels = degatsMin;
+                    degatsActuels = DEGATS_MIN;
                 }
             }
         }
 
         if (cibleActuelle != null && peutAttaquer()) {
-
             if (rayonActuel == null || rayonActuel.estDetruit()) {
                 rayonActuel = new Projectile(this.getX(), this.getY(), 0.0, cibleActuelle, "RAYON_X", this.degatsActuels, this);
                 env.ajouterProjectile(rayonActuel);
             }
 
             cibleActuelle.perdreVie(this.degatsActuels, this);
-            degatsActuels *= pasAugmentation;
-            if (degatsActuels > degatsMax) {
-                degatsActuels = degatsMax;
+            degatsActuels *= PAS_AUGMENTATION;
+            if (degatsActuels > DEGATS_MAX) {
+                degatsActuels = DEGATS_MAX;
             }
 
             recharger();
@@ -64,7 +63,7 @@ public class TourRayonX extends Tour {
 
     @Override
     public void reinitialiserAttaque() {
-        this.degatsActuels = this.degatsMin;
+        this.degatsActuels = DEGATS_MIN;
         this.cibleActuelle = null;
     }
 
@@ -74,11 +73,6 @@ public class TourRayonX extends Tour {
         return Math.sqrt(diffX * diffX + diffY * diffY) <= this.getPortee();
     }
 
-    public Projectile getRayonActuel(){
-        return this.rayonActuel;
-    }
-
-    public Microbe getCibleActuelle() {
-        return cibleActuelle;
-    }
+    public Projectile getRayonActuel(){ return this.rayonActuel; }
+    public Microbe getCibleActuelle() { return cibleActuelle; }
 }
