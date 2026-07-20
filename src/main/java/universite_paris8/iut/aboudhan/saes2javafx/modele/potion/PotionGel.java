@@ -5,10 +5,15 @@ import javafx.util.Duration;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.jeu.Environnement;
 import universite_paris8.iut.aboudhan.saes2javafx.modele.microbe.Microbe;
 
-public class PotionGel {
+public class PotionGel extends Potion {
 
     public static final int prixAchat = 75;
 
+    public PotionGel() {
+        super("Potion de Gel", prixAchat);
+    }
+
+    @Override
     public void appliquerEffet(Environnement env) {
         env.setMicrobesGeles(true);
 
