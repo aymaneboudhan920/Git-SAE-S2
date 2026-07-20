@@ -5,17 +5,17 @@ import universite_paris8.iut.aboudhan.saes2javafx.modele.jeu.Environnement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static javafx.collections.FXCollections.observableArrayList;
 
 public class GestionnaireVagues {
-    public List<Vague> listeVagues;
+    public final List<Vague> listeVagues;
     public int numVagueActu;
-    public Environnement env;
-
     private final ObservableList<Microbe> listeMicrobes = observableArrayList();
+    private final Random random = new Random();
 
-    public GestionnaireVagues(){
+    public GestionnaireVagues() {
         this.listeVagues = new ArrayList<>();
         this.numVagueActu = 0;
         creerListeMicrobes();
@@ -36,6 +36,7 @@ public class GestionnaireVagues {
     }
 
     public void initialiserVagues(Environnement env) {
+        listeVagues.clear();
         listeVagues.add(creerVague(env, 1.0, 10, 0, 1, 1));
         listeVagues.add(creerVague(env, 1.5, 15, 0, 2, 2));
         listeVagues.add(creerVague(env, 1.5, 15, 0, 3, 3));
@@ -53,25 +54,27 @@ public class GestionnaireVagues {
         Vague vague = new Vague(intervalle, bonusArgent);
 
         for (int i = 0; i < nbMicrobes; i++) {
-            Microbe m = listeMicrobes.get((int)(Math.random() * (indexMax-indexMin + 1)) + indexMin);
+            int indexAleatoire = random.nextInt((indexMax - indexMin) + 1) + indexMin;
+            Microbe m = listeMicrobes.get(indexAleatoire);
 
             Microbe microbeJeu = new Microbe(
                     m.vitesseDeBase,
                     m.pvMax,
                     m.getRecompense(),
-                    m.infection,
+                    m.getInfection(),
                     m.getType(),
                     env.creerItineraireAleatoire()
             );
 
             vague.getFileAttenteMicrobes().add(microbeJeu);
-
         }
 
         return vague;
     }
 
+    public List<Vague> getListeVagues() { return listeVagues; }
     public int getNumVagueActu() { return numVagueActu; }
+    public void setNumVagueActu(int numVagueActu) { this.numVagueActu = numVagueActu; }
 
     public Vague getVagueActuelle() {
         if (numVagueActu < listeVagues.size()) {
@@ -80,6 +83,6 @@ public class GestionnaireVagues {
         return null;
     }
 
-    public void AugmenterVague(){ this.numVagueActu++; }
-    public boolean estDerniereVague(){ return numVagueActu == this.listeVagues.size() - 1; }
+    public void AugmenterVague() { this.numVagueActu++; }
+    public boolean estDerniereVague() { return numVagueActu == this.listeVagues.size() - 1; }
 }
