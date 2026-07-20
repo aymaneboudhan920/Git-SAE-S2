@@ -41,14 +41,15 @@ public class Configuration {
                 clipMusique.close();
             }
 
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(ressourceAudio);
-            clipMusique = AudioSystem.getClip();
-            clipMusique.open(audioStream);
+            if (ressourceAudio != null) {
+                AudioInputStream audioStream = AudioSystem.getAudioInputStream(ressourceAudio);
+                clipMusique = AudioSystem.getClip();
+                clipMusique.open(audioStream);
 
-            clipMusique.loop(Clip.LOOP_CONTINUOUSLY);
-            setVolumeMusique(this.volumeMusique);
-            clipMusique.start();
-
+                clipMusique.loop(Clip.LOOP_CONTINUOUSLY);
+                setVolumeMusique(this.volumeMusique);
+                clipMusique.start();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -84,9 +85,7 @@ public class Configuration {
             float plancherAudible = Math.max(minimum, -40.0f);
             float db = plancherAudible + (float)(v * (maximum - plancherAudible));
 
-            if (db < gainControl.getMinimum()) db = gainControl.getMinimum();
-            if (db > gainControl.getMaximum()) db = gainControl.getMaximum();
-
+            db = Math.max(gainControl.getMinimum(), Math.min(gainControl.getMaximum(), db));
             gainControl.setValue(db);
         }
     }
