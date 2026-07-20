@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Vague {
-    public List<Microbe> fileAttenteMicrobes;
-    public double tempsIntervalle;
-    public int bonus;
+    private final List<Microbe> fileAttenteMicrobes;
+    private final double tempsIntervalle;
+    private final int bonus;
 
     public Vague(double t, int b){
         this.fileAttenteMicrobes = new ArrayList<>();
