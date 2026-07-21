@@ -14,6 +14,7 @@ public class MicrobeVue extends VBox {
     public MicrobeVue(String typeMicrobe, double initialX, double initialY, double ratioPV) {
         String cheminImage = associerTypeAImage(typeMicrobe);
 
+
         // Création de l'image du microbe
         this.imageMicrobe = new ImageView(new Image(getClass().getResourceAsStream(cheminImage)));
         this.imageMicrobe.setFitWidth(34);
@@ -21,7 +22,7 @@ public class MicrobeVue extends VBox {
         this.imageMicrobe.setPreserveRatio(true);
 
         // Création de la barre de vie
-        this.barreDeVie = new ProgressBar(ratioPV);
+        this.barreDeVie = new ProgressBar(1.0);
         this.barreDeVie.setPrefWidth(25);
         this.barreDeVie.setPrefHeight(3);
         this.barreDeVie.getStyleClass().add("barre-vie-microbe");
@@ -57,10 +58,8 @@ public class MicrobeVue extends VBox {
         }
     }
 
-    public void mettreAJour(double x, double y, double ratioPV) {
-        this.setTranslateX(x);
-        this.setTranslateY(y - 5);
-        this.barreDeVie.setProgress(ratioPV);
+    public ProgressBar getBarreDeVie() {
+        return this.barreDeVie;
     }
 
     public void changerImage(String nouveauType) {
