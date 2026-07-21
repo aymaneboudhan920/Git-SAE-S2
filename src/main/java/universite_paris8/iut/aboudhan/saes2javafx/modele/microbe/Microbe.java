@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Random;
 
 public class Microbe {
-    private double x;
-    private double y;
+    private final DoubleProperty x = new SimpleDoubleProperty();
+    private final DoubleProperty y = new SimpleDoubleProperty();
     public double vitesseDeBase;
     private double vitesseActu;
     private final DoubleProperty pv = new SimpleDoubleProperty();
@@ -45,12 +45,12 @@ public class Microbe {
         }
 
         if (waypointDepart != null) {
-            this.x = waypointDepart.getX();
-            this.y = waypointDepart.getY();
+            this.x.set(waypointDepart.getX());
+            this.y.set(waypointDepart.getY());
             this.waypointCible = waypointDepart.obtenirProchainWaypoint();
         } else {
-            this.x = 0;
-            this.y = 0;
+            this.x.set(0);
+            this.y.set(0);
             this.waypointCible = null;
         }
     }
@@ -61,26 +61,26 @@ public class Microbe {
         }
         if (this.estGele || this.vitesseActu == 0 || this.waypointCible == null) return;
 
-        double diffX = this.waypointCible.getX() - this.x;
-        double diffY = this.waypointCible.getY() - this.y;
+        double diffX = this.waypointCible.getX() - this.getX();
+        double diffY = this.waypointCible.getY() - this.getY();
         double distance = Math.sqrt(diffX * diffX + diffY * diffY);
 
         if (distance > this.vitesseActu && distance > 0){
-            this.x += (diffX / distance) * this.vitesseActu;
-            this.y += (diffY / distance) * this.vitesseActu;
+            this.setX(this.getX() + (diffX / distance) * this.vitesseActu);
+            this.setY(this.getY() + (diffY / distance) * this.vitesseActu);
         } else {
-            this.x = this.waypointCible.getX();
-            this.y = this.waypointCible.getY();
+            this.setX(this.waypointCible.getX());
+            this.setY(this.waypointCible.getY());
             this.waypointCible = waypointCible.obtenirProchainWaypoint();
 
             if (waypointCible != null){
                 double distanceSaut = Math.sqrt(
-                        Math.pow(waypointCible.getX() - this.x, 2) +
-                                Math.pow(waypointCible.getY() - this.y, 2)
+                        Math.pow(waypointCible.getX() - this.getX(), 2) +
+                                Math.pow(waypointCible.getY() - this.getY(), 2)
                 );
                 if (distanceSaut > 70) {
-                    this.x = waypointCible.getX();
-                    this.y = waypointCible.getY();
+                    this.setX(waypointCible.getX());
+                    this.setY(waypointCible.getY());
                 }
             }
         }
@@ -138,8 +138,8 @@ public class Microbe {
     public DoubleProperty pvProperty() { return this.pv; }
     public int getRecompense() { return recompense; }
     public int getInfection() { return infection; }
-    public double getX() { return x; }
-    public double getY() { return y; }
+    public DoubleProperty xProperty() { return this.x; }
+    public DoubleProperty yProperty() { return this.y; }
     public String getType() { return this.type; }
     public Waypoint getWaypointCible() { return this.waypointCible; }
     public double getVitesseActu() { return vitesseActu; }
@@ -148,6 +148,12 @@ public class Microbe {
         this.vitesseActu = valeur;
         if (valeur == 0) this.estGele = true;
     }
+
+    public double getX() { return x.get(); }
+    public void setX(double x) { this.x.set(x); }
+
+    public double getY() { return y.get(); }
+    public void setY(double y) { this.y.set(y); }
 
     public void reinitialiserVitesse() {
         this.estGele = false;
