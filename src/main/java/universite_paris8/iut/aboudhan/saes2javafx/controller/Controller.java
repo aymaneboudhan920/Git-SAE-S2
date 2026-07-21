@@ -482,6 +482,16 @@ public class Controller implements Initializable {
                                 prochainMicrobe.getY(),
                                 prochainMicrobe.getRatioPV()
                         );
+
+                        // 1. Binding de la vie
+                        vue.getBarreDeVie().progressProperty().bind(
+                                prochainMicrobe.pvProperty().divide(prochainMicrobe.pvMax)
+                        );
+
+                        // 2. BINDING DE LA POSITION
+                        vue.translateXProperty().bind(prochainMicrobe.xProperty());
+                        vue.translateYProperty().bind(prochainMicrobe.yProperty().subtract(5));
+
                         vuesMicrobes.put(prochainMicrobe, vue);
                         conteneurPrincipal.getChildren().add(vue);
                     } else {
@@ -617,12 +627,6 @@ public class Controller implements Initializable {
         }
 
         env.getMicrobesActifs().removeIf(Microbe::estMort);
-
-        List<Microbe> copiesActifs = new ArrayList<>(env.getMicrobesActifs());
-        for (Microbe m : copiesActifs) {
-            MicrobeVue imageVue = vuesMicrobes.get(m);
-            if (imageVue != null) imageVue.mettreAJour(m.getX(), m.getY(), m.getRatioPV());
-        }
 
         vuesMicrobes.keySet().removeIf(m -> {
             if (!env.getMicrobesActifs().contains(m)) {
