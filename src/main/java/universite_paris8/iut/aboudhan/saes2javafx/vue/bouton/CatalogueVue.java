@@ -160,67 +160,67 @@ public class CatalogueVue {
 
         btnMicrobe1.setOnAction(e -> afficherTexteDescriptif("RHINOVIRUS", "Virus assez faible qui tente de s'échapper du laboratoire.\n\n" +
                 "■ Vie : 30 pv\n" +
-                "■ Dégâts : 1 personne intecter\n" +
+                "■ Dégâts : 1 personne intectée\n" +
                 "■ Vitesse : 0,8 case/s\n" +
                 "■ Gain : 2 pièce a chaque mort."
         ));
         btnMicrobe2.setOnAction(e -> afficherTexteDescriptif("NOROVIRUS", "Virus assez faible qui tente de s'échapper du laboratoire.\n\n" +
                 "■ Vie : 40 pv\n" +
-                "■ Dégâts : 1 personne intecter\n" +
+                "■ Dégâts : 1 personne intectée\n" +
                 "■ Vitesse : 1 case/s\n" +
                 "■ Gain : 3 pièce a chaque mort."
         ));
         btnMicrobe3.setOnAction(e -> afficherTexteDescriptif("STREPTOCOQUE", "Microbe plus solide que les 2 premiers.\n\n" +
                 "■ Vie : 60 pv\n" +
-                "■ Dégâts : 2 personne intecter\n" +
+                "■ Dégâts : 2 personnes intectées\n" +
                 "■ Vitesse : 0,9 case/s\n" +
                 "■ Gain : 5 pièce a chaque mort."
         ));
         btnMicrobe4.setOnAction(e -> afficherTexteDescriptif("INFLUENZA", "Microbe invisible que ne peux pas se faire toucher par les tours de défense sauf par le SCANNER.\n\n" +
                 "■ Vie : 10 pv\n" +
-                "■ Dégâts : 3 personne intecter\n" +
+                "■ Dégâts : 3 personnes intectées\n" +
                 "■ Vitesse : 0,7 case/s\n" +
                 "■ Gain : 10 pièce a chaque mort."
         ));
         btnMicrobe5.setOnAction(e -> afficherTexteDescriptif("VARICELLE", "La varicelle peux somnoler un court instant et reprend sont chemin avec une vitesse 2 fois plus rapide pendant 3 secondes.\n\n" +
                 "■ Vie : 120 pv\n" +
-                "■ Dégâts : 5 personne intecter\n" +
+                "■ Dégâts : 5 personnes intectées\n" +
                 "■ Vitesse : 1 case/s || 2 case/s\n" +
                 "■ Gain : 15 pièce a chaque mort."
         ));
         btnMicrobe6.setOnAction(e -> afficherTexteDescriptif("COVID-19", "C'est un virus qui n'a pas de capaciter supplementaire mais il est plus resistant.\n\n" +
                 "■ Vie : 200 pv\n" +
-                "■ Dégâts : 8 personne intecter\n" +
+                "■ Dégâts : 8 personnes intectées\n" +
                 "■ Vitesse : 0,8 case/s\n" +
                 "■ Gain : 20 pièce a chaque mort."
         ));
         btnMicrobe7.setOnAction(e -> afficherTexteDescriptif("VIH", "Permet de reinitialiser les dégats des tours de rayon-x pour qu'il ne fasse pas beaucoup de dégats.\n\n" +
                 "■ Vie : 250 pv\n" +
-                "■ Dégâts : 10 personne intecter\n" +
+                "■ Dégâts : 10 personnes intectées\n" +
                 "■ Vitesse : 0,6 case/s\n" +
                 "■ Gain : 30 pièce a chaque mort."
         ));
         btnMicrobe8.setOnAction(e -> afficherTexteDescriptif("TUBERCULOSE", "Pas de capaciter supplementaire.\n\n" +
                 "■ Vie : 600 pv\n" +
-                "■ Dégâts : 12 personne intecter\n" +
+                "■ Dégâts : 12 personnes intectées\n" +
                 "■ Vitesse : 0,5 case/s\n" +
                 "■ Gain : 40 pièce a chaque mort."
         ));
         btnMicrobe9.setOnAction(e -> afficherTexteDescriptif("PESTE", "Pas de capaciter supplementaire\n\n" +
                 "■ Vie : 450 pv\n" +
-                "■ Dégâts : 20 personne intecter\n" +
+                "■ Dégâts : 20 personnes intectées\n" +
                 "■ Vitesse : 0,8 case/s\n" +
                 "■ Gain : 50 pièce a chaque mort."
         ));
         btnMicrobe10.setOnAction(e -> afficherTexteDescriptif("RAGE", "Lorsque celui-ci tombe sous la barre des 25 pourcents de ces pv il se met en rage et va 2 fois plus vite.\n\n" +
                 "■ Vie : 300 pv\n" +
-                "■ Dégâts : 15 personne intecter\n" +
+                "■ Dégâts : 15 personnes intectées\n" +
                 "■ Vitesse : 1 case/s || 2 case/s\n" +
                 "■ Gain : 70 pièce a chaque mort."
         ));
         btnMicrobe11.setOnAction(e -> afficherTexteDescriptif("VARIOLE", "Le virus le plus puissant avec une tres grande barre de vie et une vitesse faible.\n\n" +
                 "■ Vie : 2000 pv\n" +
-                "■ Dégâts : 50 personne intecter\n" +
+                "■ Dégâts : 50 personnes intectées\n" +
                 "■ Vitesse : 0,3 case/s\n" +
                 "■ Gain : 100 pièce a chaque mort."
         ));
