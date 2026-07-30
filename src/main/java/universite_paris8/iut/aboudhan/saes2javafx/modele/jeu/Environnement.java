@@ -121,6 +121,11 @@ public class Environnement {
         if (tour != null) {
             int gain = tour.calculerValeurVente();
             this.argent.set(this.argent.get() + gain);
+            int[] caseGrille = tourVersCaseGrille.remove(tour);
+            if (caseGrille != null) {
+                grille[caseGrille[1]][caseGrille[0]] = 0;
+            }
+            toursPosees.remove(tour);
             this.getTourVersIndexInventaire().remove(tour);
         }
     }
